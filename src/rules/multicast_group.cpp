@@ -17,6 +17,15 @@ public:
         return "Every switch on a multicast stream's path must have the group configured";
     }
 
+    std::string explain() const override {
+        return "MC001 — Multicast Forwarding Database (FDB) Miss\n"
+               "Automotive switches typically use static multicast group configurations to prevent flooding.\n"
+               "If a multicast stream traverses a switch that has no matching entry in its Multicast Groups\n"
+               "table, the switch may either discard the frame or flood it to all ports, depending on its\n"
+               "default policy. Both behaviors are unacceptable in a deterministic network.\n\n"
+               "Related: FW001 (firewall)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -32,6 +41,7 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    v.line_number = stream.line_number;
                     violations.push_back(v);
                     continue;
                 }
@@ -71,6 +81,7 @@ public:
                             v.stream_id = stream.id;
                             v.node_id   = sw_id;
                             v.message   = msg.str();
+                            v.line_number = nit->second->line_number;
                             violations.push_back(v);
                         }
                     }

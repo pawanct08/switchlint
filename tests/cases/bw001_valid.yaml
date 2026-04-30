@@ -1,0 +1,4 @@
+# tests/cases/bw001_valid.yaml
+topology: ../fixtures/valid_topology.yaml
+rules: BW001
+expect: []

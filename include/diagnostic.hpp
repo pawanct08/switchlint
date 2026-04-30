@@ -24,6 +24,7 @@ struct Violation {
     std::string node_id;
     std::string port_id;
     std::string message;
+    int         line_number{1};
 };
 
 struct Suppression {

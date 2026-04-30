@@ -19,6 +19,18 @@ public:
         return "CBS shaper must be configured with coherent parameters on all switch ports for TSN class-A/B streams";
     }
 
+    std::string explain() const override {
+        return "TSN001 — CBS Configuration Coherence\n"
+               "IEEE 802.1Qav (Credit-Based Shaper) requires four parameters: idleSlope, sendSlope, hiCredit, and loCredit.\n"
+               "For proper traffic shaping:\n"
+               " - idleSlope must be positive (the reserved bandwidth)\n"
+               " - sendSlope must be negative (rate at which credit is spent)\n"
+               " - hiCredit should be positive (max credit burst allowed)\n"
+               " - loCredit should be negative (min credit allowed)\n"
+               "Missing or misconfigured CBS parameters can lead to unpredictable latency or packet loss.\n\n"
+               "Related: LAT001 (latency budget), BW001 (oversubscription)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -34,6 +46,7 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    v.line_number = stream.line_number;
                     violations.push_back(v);
                     continue;
                 }
@@ -68,6 +81,7 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
+                            v.line_number = port->line_number;
                             violations.push_back(v);
                         };
 

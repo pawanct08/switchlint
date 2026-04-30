@@ -69,6 +69,7 @@ struct Port {
     MACsecConfig               macsec;
     std::vector<FirewallEntry> firewall;
     std::optional<StormControl> storm_control;
+    int                        line_number{1};
 };
 
 // ─── Node (ECU or Switch) ─────────────────────────────────────────────────────
@@ -83,6 +84,7 @@ struct Node {
     std::string       id;
     NodeType          type{NodeType::ECU};
     std::vector<Port> ports;
+    int               line_number{1};
 };
 
 // ─── Link ─────────────────────────────────────────────────────────────────────
@@ -118,6 +120,7 @@ struct Stream {
     uint32_t                 bandwidth_kbps{0};
     uint8_t                  safety_level{0}; // 0=none, 1=QM, 2=ASIL-A, ...
     uint32_t                 max_latency_us{0}; // 0 = no constraint
+    int                      line_number{1};
 };
 
 // ─── SOME/IP Service ──────────────────────────────────────────────────────────
@@ -127,6 +130,7 @@ struct SomeIPService {
     uint16_t    instance_id;
     uint16_t    port;
     std::string provider_ecu;
+    int         line_number{1};
 };
 
 // ─── Domains ──────────────────────────────────────────────────────────────────

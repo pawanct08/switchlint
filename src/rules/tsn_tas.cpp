@@ -15,6 +15,15 @@ public:
         return "TAS (time-aware shaper) gate control list must be present on switch ports for tsn_class=3 streams";
     }
 
+    std::string explain() const override {
+        return "TSN002 — Time-Aware Shaper (TAS) Missing GCL\n"
+               "IEEE 802.1Qbv defines the Time-Aware Shaper (TAS) which uses a Gate Control List (GCL) to\n"
+               "schedule traffic based on time slots. This is critical for ultra-low latency and jitter.\n"
+               "If a stream is marked as TAS (tsn_class=3), but a switch port on its path lacks a GCL,\n"
+               "the stream's timing guarantees cannot be enforced.\n\n"
+               "Related: TSN001 (CBS), LAT001 (latency budget)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -30,6 +39,7 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    v.line_number = stream.line_number;
                     violations.push_back(v);
                     continue;
                 }
@@ -61,6 +71,7 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
+                            v.line_number = port->line_number;
                             violations.push_back(v);
                         };
 

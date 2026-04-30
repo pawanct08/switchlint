@@ -11,6 +11,15 @@ public:
         return "Detect isolated nodes and invalid stream endpoints";
     }
 
+    std::string explain() const override {
+        return "ORPH001 — Orphan Node/Stream Detection\n"
+               "Validates the structural integrity of the topology graph.\n"
+               "1. Flags nodes that have no link entries (orphaned hardware).\n"
+               "2. Flags streams referencing non-existent source or destination nodes.\n"
+               "This is critical for catching typos in large YAML files before they cause solver failures.\n\n"
+               "Related: TOPO001 (redundancy)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -28,6 +37,7 @@ public:
                 v.rule_id  = id();
                 v.node_id  = node.id;
                 v.message  = "Node " + node.id + " is isolated (has no links)";
+                v.line_number = node.line_number;
                 violations.push_back(v);
             }
         }
@@ -40,6 +50,7 @@ public:
                 v.rule_id   = id();
                 v.stream_id = stream.id;
                 v.message   = "Stream " + stream.id + " source node '" + stream.src_node + "' does not exist";
+                v.line_number = stream.line_number;
                 violations.push_back(v);
             }
 
@@ -50,6 +61,7 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "Stream " + stream.id + " destination node '" + dst + "' does not exist";
+                    v.line_number = stream.line_number;
                     violations.push_back(v);
                 }
             }

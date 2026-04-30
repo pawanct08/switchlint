@@ -16,6 +16,15 @@ public:
         return "Cumulative class-A stream bandwidth must not exceed 75% of switch port line rate";
     }
 
+    std::string explain() const override {
+        return "BW001 — Bandwidth Oversubscription\n"
+               "IEEE 802.1Qav recommends limiting Class-A traffic to 75% of the link speed to ensure\n"
+               "there is sufficient bandwidth for other traffic classes and to bound worst-case latency.\n"
+               "If the sum of reserved bandwidth for all Class-A streams on a port exceeds this limit,\n"
+               "the network may experience congestion and latency spikes.\n\n"
+               "Related: TSN001 (CBS), LAT001 (latency budget)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -73,6 +82,7 @@ public:
                 v.node_id  = node_id;
                 v.port_id  = port_id;
                 v.message  = msg.str();
+                v.line_number = port->line_number;
                 violations.push_back(v);
             }
         }

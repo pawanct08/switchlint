@@ -12,6 +12,15 @@ public:
         return "Streams must not exceed 7 switch hops to bound worst-case latency";
     }
 
+    std::string explain() const override {
+        return "TOPO002 — Switch Hop Count Limit\n"
+               "End-to-end latency in TSN is bounded by the sum of worst-case delays at each hop.\n"
+               "IEEE 802.1Qav and automotive profiles often assume a maximum of 7 switch hops\n"
+               "between any two ECUs to ensure frame accumulation doesn't exceed the jitter budget.\n"
+               "More than 7 hops makes latency calculation extremely sensitive to small config changes.\n\n"
+               "Related: LAT001 (latency budget), TOPO001 (redundancy)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
         const int threshold = 7;
@@ -39,6 +48,7 @@ public:
                         v.stream_id = stream.id;
                         v.message   = "Stream " + stream.id + ": " + std::to_string(actual_switches) + 
                                       " switch hops on path to " + dst + " — latency budget at risk";
+                        v.line_number = stream.line_number;
                         violations.push_back(v);
                     }
                 }

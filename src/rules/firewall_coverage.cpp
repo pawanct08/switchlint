@@ -20,6 +20,14 @@ public:
         return "Every switch port on a stream's path must have a matching firewall permit entry";
     }
 
+    std::string explain() const override {
+        return "FW001 — Firewall Coverage Gap\n"
+               "Zero-trust networking requires that every stream be explicitly permitted on every switch port.\n"
+               "Missing permit entries are a common cause of frame loss and can indicate unauthorized traffic.\n"
+               "By default, switchlint checks multicast streams; use --strict-unicast-fw to also verify unicast.\n\n"
+               "Related: MC001 (multicast groups), SEC001 (MACsec)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -35,6 +43,7 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    v.line_number = stream.line_number;
                     violations.push_back(v);
                     continue;
                 }
@@ -82,6 +91,7 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
+                            v.line_number = port->line_number;
                             violations.push_back(v);
                         }
                     }

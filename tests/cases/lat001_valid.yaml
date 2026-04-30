@@ -1,0 +1,4 @@
+# tests/cases/lat001_valid.yaml
+topology: ../fixtures/valid_topology.yaml
+rules: LAT001
+expect: []

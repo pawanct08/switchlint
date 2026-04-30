@@ -17,6 +17,14 @@ public:
         return "Tagged/untagged egress consistency: untagged egress port pvid must match stream VLAN";
     }
 
+    std::string explain() const override {
+        return "VLAN002 — Tagging Consistency\n"
+               "IEEE 802.1Q §6.9: A port configured as 'untagged' for a VLAN will strip the 802.1Q tag on egress.\n"
+               "If the port's PVID (Port VLAN ID) does not match the stream's VLAN, the receiving ECU will\n"
+               "not be able to correctly identify the traffic's VLAN membership.\n\n"
+               "Related: VLAN001 (membership)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -49,6 +57,7 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
+                            v.line_number = it->second->line_number;
                             violations.push_back(v);
                         }
                     }

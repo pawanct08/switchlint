@@ -25,3 +25,13 @@ jobs:
 
       - name: Lint valid topology (smoke test)
         run: ./build/switchlint tests/fixtures/valid_topology.yaml
+
+      - name: Generate SARIF
+        run: ./build/switchlint tests/fixtures/valid_topology.yaml --format sarif --output results.sarif
+        if: always()
+
+      - name: Upload SARIF
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+        if: always()

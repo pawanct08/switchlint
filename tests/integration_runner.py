@@ -40,6 +40,17 @@ def run_test(case_path):
         return False
     
     # Compare
+    # Case: No violations expected
+    if not expected:
+        if actual:
+            print(f"[FAIL] {case_path}: expected 0 violations, got {len(actual)}")
+            for v in actual:
+                print(f"  - [{v.get('severity', '???')}] {v.get('rule_id', '???')}: {v.get('message', '???')}")
+            return False
+        print(f"[PASS] {case_path}")
+        return True
+
+    # Case: Expectations present
     for exp in expected:
         found = False
         for act in actual:

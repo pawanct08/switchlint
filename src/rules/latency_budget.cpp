@@ -4,6 +4,7 @@
 #include "rule_engine.hpp"
 #include "path_resolver.hpp"
 #include <sstream>
+#include <unordered_set>
 
 namespace switchlint {
 
@@ -14,6 +15,15 @@ public:
     std::string id()          const override { return "LAT001"; }
     std::string description() const override {
         return "CBS Class-A streams must not exceed their configured end-to-end latency budget (IEEE 802.1Qav)";
+    }
+
+    std::string explain() const override {
+        return "LAT001 — Latency Budget Overrun\n"
+               "IEEE 802.1Qav: Credit-Based Shaper (CBS) provides bounded latency for Class-A traffic.\n"
+               "The worst-case delay per hop is approximately (max_frame_size / idleSlope).\n"
+               "If the sum of per-hop delays exceeds the 'max_latency_us' defined in the stream config,\n"
+               "the stream may miss its timing requirements in a worst-case scenario.\n\n"
+               "Related: TSN001 (CBS config), BW001 (bandwidth oversubscription)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {
@@ -28,13 +38,16 @@ public:
                 for (const auto& path : paths) {
                     uint64_t total_delay_us = 0;
                     bool path_coherent = true;
-
+                    std::unordered_set<std::string> counted_switches;
                     for (const auto& hop : path) {
                         if (hop.port_id.empty()) continue;
 
                         auto nit = topo.node_index.find(hop.node_id);
                         if (nit != topo.node_index.end() && nit->second->type != NodeType::SWITCH)
                             continue;
+                        
+                        if (counted_switches.count(hop.node_id)) continue;
+                        counted_switches.insert(hop.node_id);
 
                         auto pit = topo.port_index.find(hop.node_id + "::" + hop.port_id);
                         if (pit == topo.port_index.end()) continue;
@@ -61,6 +74,7 @@ public:
                         v.rule_id   = id();
                         v.stream_id = stream.id;
                         v.message   = msg.str();
+                        v.line_number = stream.line_number;
                         violations.push_back(v);
                     }
                 }

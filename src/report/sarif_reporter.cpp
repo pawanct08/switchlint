@@ -60,7 +60,7 @@ void print_sarif_report(const std::vector<Violation>& violations, std::ostream& 
                             {"uri", "topology.yaml"} // Ideally we'd pass the actual input filename here
                         }},
                         {"region", {
-                            {"startLine", 1} // Topology models don't always map back to YAML lines easily
+                            {"startLine", v.line_number}
                         }}
                     }}
                 }

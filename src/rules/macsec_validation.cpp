@@ -12,6 +12,15 @@ public:
         return "Cross-domain streams must be protected by MACsec on boundary links";
     }
 
+    std::string explain() const override {
+        return "SEC001 — MACsec Security Boundary Gap\n"
+               "IEEE 802.1AE (MACsec) provides point-to-point encryption and integrity for Ethernet links.\n"
+               "In automotive architectures, 'domains' (e.g., powertrain, infotainment) should be isolated.\n"
+               "If a stream crosses a domain boundary, the physical link connecting those domains must\n"
+               "have MACsec enabled on both ends to prevent unauthorized access or spoofing.\n\n"
+               "Related: FW001 (firewall)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 
@@ -71,6 +80,7 @@ public:
                                     v.node_id   = hop1.node_id; // Keep node/port as primary reference point
                                     v.port_id   = hop1.port_id;
                                     v.message   = msg.str();
+                                    v.line_number = p1 ? p1->line_number : stream.line_number;
                                     violations.push_back(v);
                                 }
                             }

@@ -70,6 +70,7 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
+                            v.line_number = it->second->line_number;
                             violations.push_back(v);
                         }
                     }
