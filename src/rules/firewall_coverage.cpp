@@ -12,7 +12,9 @@
 namespace switchlint {
 
 class FirewallCoverageRule : public Rule {
+    bool strict_unicast;
 public:
+    explicit FirewallCoverageRule(bool strict) : strict_unicast(strict) {}
     std::string id()          const override { return "FW001"; }
     std::string description() const override {
         return "Every switch port on a stream's path must have a matching firewall permit entry";
@@ -22,8 +24,21 @@ public:
         std::vector<Violation> violations;
 
         for (const auto& stream : topo.streams) {
+            if (stream.multicast_ip == 0 && !strict_unicast) continue;
+
             for (const auto& dst : stream.dst_nodes) {
                 auto paths = resolve_stream_paths(stream, dst, topo);
+                
+                if (paths.empty()) {
+                    Violation v;
+                    v.severity  = Severity::WARN;
+                    v.rule_id   = id();
+                    v.stream_id = stream.id;
+                    v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    violations.push_back(v);
+                    continue;
+                }
+
                 for (const auto& path : paths) {
                     for (const auto& hop : path) {
                         if (hop.port_id.empty()) continue;
@@ -77,8 +92,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_firewall_coverage_rule() {
-    return std::make_unique<FirewallCoverageRule>();
+std::unique_ptr<Rule> make_firewall_coverage_rule(bool strict_unicast) {
+    return std::make_unique<FirewallCoverageRule>(strict_unicast);
 }
 
 } // namespace switchlint

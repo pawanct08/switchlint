@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 #ifdef _WIN32
 #  include <windows.h>   // EnableVirtualTerminalProcessing for ANSI colors
@@ -48,6 +49,7 @@ static void print_usage(const char* prog) {
         "  --list-rules            List all rules and exit\n"
         "  --no-color              Disable ANSI colors\n"
         "  --fail-on-warn          Exit 1 on warnings too\n"
+        "  --strict-unicast-fw     Enforce firewall rules on unicast streams\n"
         "  --help                  Show this message\n";
 }
 
@@ -62,6 +64,7 @@ int main(int argc, char* argv[]) {
     bool use_color      = true;
     bool fail_on_warn   = false;
     bool list_rules_opt = false;
+    bool strict_unicast_fw = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -74,6 +77,8 @@ int main(int argc, char* argv[]) {
             use_color = false;
         } else if (arg == "--fail-on-warn") {
             fail_on_warn = true;
+        } else if (arg == "--strict-unicast-fw") {
+            strict_unicast_fw = true;
         } else if (arg == "--format" && i + 1 < argc) {
             format = argv[++i];
         } else if (arg == "--output" && i + 1 < argc) {
@@ -91,7 +96,7 @@ int main(int argc, char* argv[]) {
 
     // ─── build rule registry ───────────────────────────────────────────────
     switchlint::RuleRegistry registry;
-    switchlint::register_builtin_rules(registry);
+    switchlint::register_builtin_rules(registry, strict_unicast_fw);
 
     if (list_rules_opt) {
         for (const auto& [id, desc] : registry.list_rules())
@@ -140,8 +145,17 @@ int main(int argc, char* argv[]) {
         else
             switchlint::write_json_report(violations, output_file);
     } else {
-        // text mode — always stdout; --output ignored for simplicity
-        switchlint::print_text_report(violations, use_color);
+        if (output_file.empty()) {
+            switchlint::print_text_report(violations, use_color, std::cout);
+        } else {
+            std::ofstream ofs(output_file);
+            if (!ofs) {
+                std::cerr << "[FATAL] Failed to open output file: " << output_file << '\n';
+                return 2;
+            }
+            // disable color when writing to file
+            switchlint::print_text_report(violations, false, ofs);
+        }
     }
 
     // ─── exit code ─────────────────────────────────────────────────────────

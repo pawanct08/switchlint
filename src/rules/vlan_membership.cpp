@@ -39,6 +39,9 @@ public:
                     for (const auto& hop : path) {
                         if (hop.port_id.empty()) continue; // source node — no entry port
 
+                        auto nit = topo.node_index.find(hop.node_id);
+                        if (nit != topo.node_index.end() && nit->second->type == NodeType::ECU) continue;
+
                         std::string key = hop.node_id + "::" + hop.port_id;
                         auto it = topo.port_index.find(key);
                         if (it == topo.port_index.end()) continue;

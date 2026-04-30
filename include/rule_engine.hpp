@@ -46,6 +46,6 @@ private:
 };
 
 /// Populate the registry with all built-in rules.
-void register_builtin_rules(RuleRegistry& registry);
+void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw = false);
 
 } // namespace switchlint

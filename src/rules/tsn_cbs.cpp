@@ -27,6 +27,17 @@ public:
 
             for (const auto& dst : stream.dst_nodes) {
                 auto paths = resolve_stream_paths(stream, dst, topo);
+                
+                if (paths.empty()) {
+                    Violation v;
+                    v.severity  = Severity::WARN;
+                    v.rule_id   = id();
+                    v.stream_id = stream.id;
+                    v.message   = "No physical path found from " + stream.src_node + " to " + dst;
+                    violations.push_back(v);
+                    continue;
+                }
+
                 for (const auto& path : paths) {
                     for (const auto& hop : path) {
                         if (hop.port_id.empty()) continue;

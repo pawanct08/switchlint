@@ -15,7 +15,8 @@ static const char* CYAN   = "\033[36m";
 static const char* BOLD   = "\033[1m";
 
 void print_text_report(const std::vector<Violation>& violations,
-                       bool use_color)
+                       bool use_color,
+                       std::ostream& os)
 {
     int errors = 0, warnings = 0, infos = 0;
 
@@ -27,20 +28,20 @@ void print_text_report(const std::vector<Violation>& violations,
             case Severity::INFO:  prefix = "[INFO] "; color = CYAN;   ++infos;    break;
         }
 
-        if (use_color) std::cout << BOLD << color;
-        std::cout << prefix;
-        if (use_color) std::cout << RESET;
-        std::cout << " " << v.message << '\n';
+        if (use_color) os << BOLD << color;
+        os << prefix;
+        if (use_color) os << RESET;
+        os << " " << v.message << '\n';
     }
 
     // Summary line
-    std::cout << '\n';
-    if (use_color) std::cout << BOLD;
-    std::cout << "Summary: " << errors << " error(s), "
-              << warnings << " warning(s), "
-              << infos << " info(s)";
-    if (use_color) std::cout << RESET;
-    std::cout << '\n';
+    os << '\n';
+    if (use_color) os << BOLD;
+    os << "Summary: " << errors << " error(s), "
+       << warnings << " warning(s), "
+       << infos << " info(s)";
+    if (use_color) os << RESET;
+    os << '\n';
 }
 
 } // namespace switchlint

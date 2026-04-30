@@ -10,15 +10,15 @@ std::unique_ptr<Rule> make_vlan_tagging_rule();
 std::unique_ptr<Rule> make_multicast_group_rule();
 std::unique_ptr<Rule> make_tsn_cbs_rule();
 std::unique_ptr<Rule> make_tsn_tas_rule();
-std::unique_ptr<Rule> make_firewall_coverage_rule();
+std::unique_ptr<Rule> make_firewall_coverage_rule(bool strict_unicast_fw);
 
-void register_builtin_rules(RuleRegistry& registry) {
+void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw) {
     registry.register_rule(make_vlan_membership_rule());
     registry.register_rule(make_vlan_tagging_rule());
     registry.register_rule(make_multicast_group_rule());
     registry.register_rule(make_tsn_cbs_rule());
     registry.register_rule(make_tsn_tas_rule());
-    registry.register_rule(make_firewall_coverage_rule());
+    registry.register_rule(make_firewall_coverage_rule(strict_unicast_fw));
 }
 
 } // namespace switchlint

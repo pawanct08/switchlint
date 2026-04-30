@@ -20,7 +20,7 @@ namespace switchlint {
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 
-static uint32_t parse_ipv4(const std::string& s) {
+static uint32_t parse_ipv4(const std::string& s, bool require_multicast = false) {
     struct in_addr addr{};
 #ifdef _WIN32
     if (inet_pton(AF_INET, s.c_str(), &addr) != 1)
@@ -28,7 +28,12 @@ static uint32_t parse_ipv4(const std::string& s) {
     if (inet_pton(AF_INET, s.c_str(), &addr) != 1)
 #endif
         throw std::runtime_error("Invalid IPv4 address: " + s);
-    return ntohl(addr.s_addr);  // store in host byte order
+    
+    uint32_t ip = ntohl(addr.s_addr);
+    if (require_multicast && ((ip >> 28) != 0xE)) {
+        throw std::runtime_error("Invalid multicast IP (must be 224.0.0.0/4): " + s);
+    }
+    return ip;  // store in host byte order
 }
 
 static CBSConfig parse_cbs(const YAML::Node& n) {
@@ -150,7 +155,7 @@ Topology parse_yaml(const std::string& path) {
             stream.bandwidth_kbps = s["bandwidth_kbps"] ? s["bandwidth_kbps"].as<uint32_t>() : 0;
 
             if (s["multicast_ip"] && !s["multicast_ip"].IsNull()) {
-                stream.multicast_ip = parse_ipv4(s["multicast_ip"].as<std::string>());
+                stream.multicast_ip = parse_ipv4(s["multicast_ip"].as<std::string>(), true);
             }
 
             topo.streams.push_back(stream);
@@ -161,7 +166,7 @@ Topology parse_yaml(const std::string& path) {
     if (root["multicast_groups"]) {
         for (const auto& mg : root["multicast_groups"]) {
             MulticastGroup g;
-            g.group_ip  = parse_ipv4(mg["group_ip"].as<std::string>());
+            g.group_ip  = parse_ipv4(mg["group_ip"].as<std::string>(), true);
             g.switch_id = mg["switch_id"].as<std::string>();
             topo.multicast_groups.push_back(g);
         }
