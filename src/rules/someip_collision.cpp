@@ -17,10 +17,10 @@ public:
 
     std::string explain() const override {
         return "SD001 — SOME/IP Service Collision\n"
-               "SOME/IP (Scalable service-Oriented MiddlewarE over IP) requires unique (Service ID, Instance ID)\n"
-               "pairs within a network domain to correctly route Service Discovery (SD) messages.\n"
-               "Additionally, each service provider on an ECU should use a unique L4 port to avoid\n"
-               "binding conflicts at the socket layer.\n\n"
+               "Protocol: SOME/IP Service Discovery. Each service must have a unique ID within a domain.\n"
+               "Collisions cause Service Discovery messages to be misrouted, preventing clients from\n"
+               "connecting to the correct provider and disabling logical application features.\n"
+               "Fix: Change the 'service_id', 'instance_id', or 'port' to be unique for the provider.\n\n"
                "Related: MC001 (multicast groups), FW001 (firewall)";
     }
 

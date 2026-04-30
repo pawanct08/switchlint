@@ -21,13 +21,10 @@ public:
 
     std::string explain() const override {
         return "TSN001 — CBS Configuration Coherence\n"
-               "IEEE 802.1Qav (Credit-Based Shaper) requires four parameters: idleSlope, sendSlope, hiCredit, and loCredit.\n"
-               "For proper traffic shaping:\n"
-               " - idleSlope must be positive (the reserved bandwidth)\n"
-               " - sendSlope must be negative (rate at which credit is spent)\n"
-               " - hiCredit should be positive (max credit burst allowed)\n"
-               " - loCredit should be negative (min credit allowed)\n"
-               "Missing or misconfigured CBS parameters can lead to unpredictable latency or packet loss.\n\n"
+               "IEEE 802.1Qav: The Credit-Based Shaper ensures bandwidth reservation for Class-A/B traffic.\n"
+               "Incoherent parameters (e.g. non-negative sendSlope) will cause the hardware shaper\n"
+               "to fail, resulting in jitter spikes that break control loop stability.\n"
+               "Fix: Configure 'idle_slope_kbps' > 0 and 'send_slope_kbps' < 0 on the switch port.\n\n"
                "Related: LAT001 (latency budget), BW001 (oversubscription)";
     }
 

@@ -13,12 +13,12 @@ public:
     }
 
     std::string explain() const override {
-        return "SEC001 — MACsec Security Boundary Gap\n"
-               "IEEE 802.1AE (MACsec) provides point-to-point encryption and integrity for Ethernet links.\n"
-               "In automotive architectures, 'domains' (e.g., powertrain, infotainment) should be isolated.\n"
-               "If a stream crosses a domain boundary, the physical link connecting those domains must\n"
-               "have MACsec enabled on both ends to prevent unauthorized access or spoofing.\n\n"
-               "Related: FW001 (firewall)";
+        return "SEC001 — MACsec Security Boundary\n"
+               "Standard: IEEE 802.1AE. MACsec provides hardware-level encryption between switches.\n"
+               "Cross-domain streams (e.g. Infotainment to ADAS) are high-risk targets for spoofing.\n"
+               "Without link-layer encryption, an attacker can inject malicious control frames.\n"
+               "Fix: Add 'macsec: {enabled: true}' to both endpoints of the boundary link.\n\n"
+               "Related: FW001 (firewall), ORPH001 (orphan detection)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {

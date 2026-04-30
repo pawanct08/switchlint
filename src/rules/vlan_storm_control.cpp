@@ -14,11 +14,12 @@ public:
     }
 
     std::string explain() const override {
-        return "VLAN003 — Safety-Critical Storm Control\n"
-               "Missing storm control on a VLAN carrying safety-critical traffic (safety_level > 0) is a risk.\n"
-               "Broadcast or multicast storms can saturate link bandwidth and cause loss of critical data.\n"
-               "Standard: Automotive Ethernet Best Practices for Functional Safety.\n\n"
-               "Related: TOPO001 (redundancy), BW001 (bandwidth)";
+        return "VLAN003 — VLAN Storm Control\n"
+               "Automotive Safety Requirement: Storm control prevents broadcast/multicast traffic peaks\n"
+               "from starving safety-critical streams sharing the same physical link.\n"
+               "Without limits, a single malfunctioning ECU can bring down the entire control network.\n"
+               "Fix: Add 'storm_control' configuration block to the reported switch port.\n\n"
+               "Related: TOPO001 (redundancy), BW001 (oversubscription)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {

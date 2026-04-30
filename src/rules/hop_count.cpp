@@ -13,11 +13,11 @@ public:
     }
 
     std::string explain() const override {
-        return "TOPO002 — Switch Hop Count Limit\n"
-               "End-to-end latency in TSN is bounded by the sum of worst-case delays at each hop.\n"
-               "IEEE 802.1Qav and automotive profiles often assume a maximum of 7 switch hops\n"
-               "between any two ECUs to ensure frame accumulation doesn't exceed the jitter budget.\n"
-               "More than 7 hops makes latency calculation extremely sensitive to small config changes.\n\n"
+        return "TOPO002 — Max Switch Hops\n"
+               "Standard: Automotive TSN Profiles. Latency bounds assume a max of 7 switch hops.\n"
+               "Excessive hops accumulate jitter and frame queuing delay beyond the budget\n"
+               "modeled by standard TSN calculus, leading to non-deterministic arrival times.\n"
+               "Fix: Re-route the stream through fewer switches or reorganize the network spine.\n\n"
                "Related: LAT001 (latency budget), TOPO001 (redundancy)";
     }
 

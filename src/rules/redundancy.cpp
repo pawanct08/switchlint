@@ -13,11 +13,11 @@ public:
     }
 
     std::string explain() const override {
-        return "TOPO001 — Redundant Path Detection\n"
-               "ISO 26262 and automotive safety standards often require hardware redundancy for\n"
-               "safety-critical functions (ASIL-A to ASIL-D).\n"
-               "If a stream has safety_level > 0 but only one physical path is available in the topology,\n"
-               "a single point of failure (cable break, switch failure) could lose critical data.\n\n"
+        return "TOPO001 — Redundancy Requirement\n"
+               "Standard: ISO 26262 ASIL-D. Safety-critical systems require fail-operational networks.\n"
+               "A single physical path for ASIL traffic is a single point of failure (SPOF);\n"
+               "a link break will result in loss of control for safety-critical functions.\n"
+               "Fix: Add at least one additional physical 'link' connecting the source and destination.\n\n"
                "Related: TOPO002 (hop count), VLAN003 (storm control)";
     }
 

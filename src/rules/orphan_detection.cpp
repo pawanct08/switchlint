@@ -12,12 +12,12 @@ public:
     }
 
     std::string explain() const override {
-        return "ORPH001 — Orphan Node/Stream Detection\n"
-               "Validates the structural integrity of the topology graph.\n"
-               "1. Flags nodes that have no link entries (orphaned hardware).\n"
-               "2. Flags streams referencing non-existent source or destination nodes.\n"
-               "This is critical for catching typos in large YAML files before they cause solver failures.\n\n"
-               "Related: TOPO001 (redundancy)";
+        return "ORPH001 — Orphaned Node/Stream\n"
+               "Technical Integrity: All nodes must be connected and all streams must have valid endpoints.\n"
+               "Dangling nodes or invalid stream references indicate corrupted configuration files\n"
+               "that will lead to runtime initialization failures in the switch manager.\n"
+               "Fix: Connect the node via a 'link' or correct the 'src'/'dst' IDs in the stream.\n\n"
+               "Related: TOPO001 (redundancy), SEC001 (MACsec)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {

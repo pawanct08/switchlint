@@ -19,11 +19,11 @@ public:
 
     std::string explain() const override {
         return "LAT001 — Latency Budget Overrun\n"
-               "IEEE 802.1Qav: Credit-Based Shaper (CBS) provides bounded latency for Class-A traffic.\n"
-               "The worst-case delay per hop is approximately (max_frame_size / idleSlope).\n"
-               "If the sum of per-hop delays exceeds the 'max_latency_us' defined in the stream config,\n"
-               "the stream may miss its timing requirements in a worst-case scenario.\n\n"
-               "Related: TSN001 (CBS config), BW001 (bandwidth oversubscription)";
+               "Standard: IEEE 802.1Qav (CBS). Deterministic delay is calculated as Σ(max_frame_size / idleSlope).\n"
+               "If the calculated delay exceeds the application budget, the ECU control loop may\n"
+               "become unstable due to stale data arrival, risking physical system damage.\n"
+               "Fix: Increase 'idle_slope_kbps' for the class or decrease the stream's 'bandwidth_kbps'.\n\n"
+               "Related: TSN001 (CBS config), BW001 (oversubscription)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {

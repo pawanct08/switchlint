@@ -18,8 +18,8 @@ public:
     std::string explain() const override {
         return "VLAN001 — VLAN Membership Gap\n"
                "IEEE 802.1Q §8.8.3: A port must be a member of a VLAN to forward tagged frames for that VLAN.\n"
-               "If a switch port on the path is not in the stream's VLAN membership, frames are discarded.\n"
-               "This is the most common misconfiguration in automotive Ethernet switch bring-up.\n\n"
+               "Without membership, the switch ingress filter will drop all frames for this stream.\n"
+               "Fix: Add the VLAN ID to the 'vlan_membership' list for the reported switch port.\n\n"
                "Related: VLAN002 (tagging consistency), FW001 (firewall coverage)";
     }
 

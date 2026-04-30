@@ -22,9 +22,10 @@ public:
 
     std::string explain() const override {
         return "FW001 — Firewall Coverage Gap\n"
-               "Zero-trust networking requires that every stream be explicitly permitted on every switch port.\n"
-               "Missing permit entries are a common cause of frame loss and can indicate unauthorized traffic.\n"
-               "By default, switchlint checks multicast streams; use --strict-unicast-fw to also verify unicast.\n\n"
+               "Security: Automotive switches use access control lists (ACLs) for zero-trust traffic filtering.\n"
+               "Missing permit entries cause legitimate traffic to be dropped at the switch ingress,\n"
+               "mimicking a physical link failure or ECU disconnect.\n"
+               "Fix: Add a 'permit' entry for the stream ID or multicast IP in the port's firewall list.\n\n"
                "Related: MC001 (multicast groups), SEC001 (MACsec)";
     }
 

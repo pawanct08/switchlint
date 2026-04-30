@@ -19,11 +19,11 @@ public:
 
     std::string explain() const override {
         return "MC001 — Multicast Forwarding Database (FDB) Miss\n"
-               "Automotive switches typically use static multicast group configurations to prevent flooding.\n"
-               "If a multicast stream traverses a switch that has no matching entry in its Multicast Groups\n"
-               "table, the switch may either discard the frame or flood it to all ports, depending on its\n"
-               "default policy. Both behaviors are unacceptable in a deterministic network.\n\n"
-               "Related: FW001 (firewall)";
+               "Standard: IEEE 802.1Q static filtering. Switches use an FDB to control multicast spread.\n"
+               "If a switch lacks a static entry for a group, it may flood traffic to all ports or drop it,\n"
+               "causing non-deterministic latency or loss in safety-critical applications.\n"
+               "Fix: Add a 'multicast_groups' entry for this switch and group IP.\n\n"
+               "Related: FW001 (firewall), VLAN003 (storm control)";
     }
 
     std::vector<Violation> check(const Topology& topo) const override {

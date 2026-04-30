@@ -16,11 +16,11 @@ public:
     }
 
     std::string explain() const override {
-        return "TSN002 — Time-Aware Shaper (TAS) Missing GCL\n"
-               "IEEE 802.1Qbv defines the Time-Aware Shaper (TAS) which uses a Gate Control List (GCL) to\n"
-               "schedule traffic based on time slots. This is critical for ultra-low latency and jitter.\n"
-               "If a stream is marked as TAS (tsn_class=3), but a switch port on its path lacks a GCL,\n"
-               "the stream's timing guarantees cannot be enforced.\n\n"
+        return "TSN002 — TAS GCL Presence\n"
+               "IEEE 802.1Qbv: Time-Aware Shaper (TAS) uses a Gate Control List (GCL) for time-slot scheduling.\n"
+               "Without a GCL on every switch in the path, time-critical frames will face non-deterministic\n"
+               "queuing delays, violating the hard-real-time constraints of the system.\n"
+               "Fix: Set 'gcl_present: true' and define 'cycle_time_ns' in the port's TAS config.\n\n"
                "Related: TSN001 (CBS), LAT001 (latency budget)";
     }
 

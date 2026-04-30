@@ -19,9 +19,10 @@ public:
 
     std::string explain() const override {
         return "VLAN002 — Tagging Consistency\n"
-               "IEEE 802.1Q §6.9: A port configured as 'untagged' for a VLAN will strip the 802.1Q tag on egress.\n"
-               "If the port's PVID (Port VLAN ID) does not match the stream's VLAN, the receiving ECU will\n"
-               "not be able to correctly identify the traffic's VLAN membership.\n\n"
+               "IEEE 802.1Q §6.9: A port configured as 'untagged' strips the 802.1Q header on egress.\n"
+               "If the port's PVID does not match the stream's VLAN, the receiver gets untagged frames\n"
+               "and cannot determine their VLAN membership, leading to stack-level drops.\n"
+               "Fix: Ensure 'tagged: true' or match 'pvid' to the stream's VLAN ID.\n\n"
                "Related: VLAN001 (membership)";
     }
 

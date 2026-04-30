@@ -18,10 +18,10 @@ public:
 
     std::string explain() const override {
         return "BW001 — Bandwidth Oversubscription\n"
-               "IEEE 802.1Qav recommends limiting Class-A traffic to 75% of the link speed to ensure\n"
-               "there is sufficient bandwidth for other traffic classes and to bound worst-case latency.\n"
-               "If the sum of reserved bandwidth for all Class-A streams on a port exceeds this limit,\n"
-               "the network may experience congestion and latency spikes.\n\n"
+               "Standard: IEEE 802.1Qav §L.2. Reserved bandwidth for CBS classes must not exceed 75%.\n"
+               "Exceeding this limit prevents the shaper from guaranteeing the worst-case latency\n"
+               "and can cause frame drops for lower-priority or best-effort traffic.\n"
+               "Fix: Reduce stream bandwidths or upgrade link speeds (e.g., 100M to 1G).\n\n"
                "Related: TSN001 (CBS), LAT001 (latency budget)";
     }
 
