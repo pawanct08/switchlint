@@ -1,0 +1,93 @@
+# tests/fixtures/full_example.yaml
+# Comprehensive topology: 2 ECUs, 1 switch, 3 streams (BE, CBS-A, TAS),
+# multicast groups, firewall entries. Intentionally VALID — 0 violations.
+ecus:
+  - id: ZCU_front
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100, 200, 300]
+        tagged: true
+
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1           # uplink from ZCU_front
+        vlans: [100, 200, 300]
+        tagged: true
+        qos:
+          cbs_class_a:
+            idle_slope_kbps: 50000
+            send_slope_kbps: -950000
+            hi_credit: 1500
+            lo_credit: -28500
+          tas:
+            gcl_present: true
+            cycle_time_ns: 1000000
+        firewall:
+          - stream_id: cam_front
+            dst_ip: "239.1.1.1"
+            action: permit
+          - stream_id: radar_rear
+            action: permit
+          - stream_id: lidar_top
+            action: permit
+
+      - id: p2           # downlink to ECU_display
+        vlans: [100, 200, 300]
+        tagged: true
+        qos:
+          cbs_class_a:
+            idle_slope_kbps: 50000
+            send_slope_kbps: -950000
+            hi_credit: 1500
+            lo_credit: -28500
+          tas:
+            gcl_present: true
+            cycle_time_ns: 1000000
+        firewall:
+          - stream_id: cam_front
+            dst_ip: "239.1.1.1"
+            action: permit
+          - stream_id: radar_rear
+            action: permit
+          - stream_id: lidar_top
+            action: permit
+
+  - id: ECU_display
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100, 200, 300]
+        tagged: true
+
+links:
+  - {src: ZCU_front,   src_port: eth0, dst: SW1,         dst_port: p1}
+  - {src: SW1,         src_port: p2,   dst: ECU_display,  dst_port: eth0}
+
+streams:
+  - id: cam_front
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 100
+    multicast_ip: "239.1.1.1"
+    tsn_class: 1            # CBS Class A
+    bandwidth_kbps: 50000
+
+  - id: radar_rear
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 200
+    tsn_class: 0            # Best-Effort
+    bandwidth_kbps: 10000
+
+  - id: lidar_top
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 300
+    tsn_class: 3            # TAS
+    bandwidth_kbps: 200000
+
+multicast_groups:
+  - group_ip: "239.1.1.1"
+    switch_id: SW1

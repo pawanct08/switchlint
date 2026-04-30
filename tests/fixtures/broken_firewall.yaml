@@ -1,0 +1,48 @@
+# tests/fixtures/broken_firewall.yaml
+# Stream cam_front passes through SW1 but p2 has NO firewall entry.
+# FW001 should fire on SW1::p2.
+ecus:
+  - id: ZCU_front
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100]
+        tagged: true
+
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1
+        vlans: [100]
+        tagged: true
+        firewall:
+          - stream_id: cam_front
+            dst_ip: "239.1.1.1"
+            action: permit
+      - id: p2
+        vlans: [100]
+        tagged: true
+        # No firewall entry — FW001 fires here
+
+  - id: ECU_display
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100]
+        tagged: true
+
+links:
+  - {src: ZCU_front, src_port: eth0, dst: SW1, dst_port: p1}
+  - {src: SW1, src_port: p2, dst: ECU_display, dst_port: eth0}
+
+streams:
+  - id: cam_front
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 100
+    multicast_ip: "239.1.1.1"
+    tsn_class: 0
+
+multicast_groups:
+  - group_ip: "239.1.1.1"
+    switch_id: SW1

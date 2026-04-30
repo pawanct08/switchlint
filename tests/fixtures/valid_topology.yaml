@@ -1,0 +1,64 @@
+# tests/fixtures/valid_topology.yaml
+# Minimal valid topology — no violations expected.
+ecus:
+  - id: ZCU_front
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100, 200]
+        tagged: true
+
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1
+        vlans: [100, 200]
+        tagged: true
+        qos:
+          cbs_class_a:
+            idle_slope_kbps: 50000
+            send_slope_kbps: -950000
+            hi_credit: 1500
+            lo_credit: -28500
+        firewall:
+          - stream_id: cam_front
+            dst_ip: "239.1.1.1"
+            action: permit
+      - id: p2
+        vlans: [100, 200]
+        tagged: true
+        qos:
+          cbs_class_a:
+            idle_slope_kbps: 50000
+            send_slope_kbps: -950000
+            hi_credit: 1500
+            lo_credit: -28500
+        firewall:
+          - stream_id: cam_front
+            dst_ip: "239.1.1.1"
+            action: permit
+
+  - id: ECU_display
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100]
+        tagged: false
+        pvid: 100
+
+links:
+  - {src: ZCU_front, src_port: eth0, dst: SW1, dst_port: p1}
+  - {src: SW1, src_port: p2, dst: ECU_display, dst_port: eth0}
+
+streams:
+  - id: cam_front
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 100
+    multicast_ip: "239.1.1.1"
+    tsn_class: 1
+    bandwidth_kbps: 50000
+
+multicast_groups:
+  - group_ip: "239.1.1.1"
+    switch_id: SW1

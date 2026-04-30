@@ -1,0 +1,46 @@
+# tests/fixtures/broken_tsn.yaml
+# Stream radar has tsn_class=1 (CBS-A) but SW1:p1 has no CBS config.
+# TSN001 should fire.
+ecus:
+  - id: RADAR_rear
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [200]
+        tagged: true
+
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1
+        vlans: [200]
+        tagged: true
+        # No QoS/CBS config — TSN001 fires
+        firewall:
+          - stream_id: radar_rear
+            action: permit
+      - id: p2
+        vlans: [200]
+        tagged: true
+        firewall:
+          - stream_id: radar_rear
+            action: permit
+
+  - id: ZCU_rear
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [200]
+        tagged: true
+
+links:
+  - {src: RADAR_rear, src_port: eth0, dst: SW1, dst_port: p1}
+  - {src: SW1, src_port: p2, dst: ZCU_rear, dst_port: eth0}
+
+streams:
+  - id: radar_rear
+    src: RADAR_rear
+    dst: [ZCU_rear]
+    vlan_id: 200
+    tsn_class: 1   # CBS-A — CBS config missing on SW1:p1 → TSN001
+    bandwidth_kbps: 100000

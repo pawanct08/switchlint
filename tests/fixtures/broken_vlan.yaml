@@ -1,0 +1,43 @@
+# tests/fixtures/broken_vlan.yaml
+# SW1 port p2 is missing VLAN 100 — VLAN001 should fire.
+# cam_front stream uses VLAN 100 but p2 only has VLAN 200.
+ecus:
+  - id: ZCU_front
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100, 200]
+        tagged: true
+
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1
+        vlans: [100, 200]
+        tagged: true
+      - id: p2
+        vlans: [200]        # ← missing VLAN 100 — VLAN001 fires here
+        tagged: true
+
+  - id: ECU_display
+    type: ecu
+    ports:
+      - id: eth0
+        vlans: [100]
+        tagged: true
+
+links:
+  - {src: ZCU_front, src_port: eth0, dst: SW1, dst_port: p1}
+  - {src: SW1, src_port: p2, dst: ECU_display, dst_port: eth0}
+
+streams:
+  - id: cam_front
+    src: ZCU_front
+    dst: [ECU_display]
+    vlan_id: 100
+    multicast_ip: "239.1.1.1"
+    tsn_class: 0
+
+multicast_groups:
+  - group_ip: "239.1.1.1"
+    switch_id: SW1
