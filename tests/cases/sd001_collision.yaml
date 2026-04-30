@@ -1,0 +1,9 @@
+# tests/cases/sd001_collision.yaml
+topology: ../fixtures/someip_collision.yaml
+expect:
+  - rule: SD001
+    node: ECU2
+    severity: ERROR
+  - rule: SD001
+    node: ECU1
+    severity: ERROR

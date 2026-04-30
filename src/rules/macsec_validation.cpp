@@ -59,15 +59,16 @@ public:
                                 
                                 if (!p1_ok || !p2_ok) {
                                     std::ostringstream msg;
-                                    msg << "Domain boundary cross (" << dom1 << " -> " << dom2 << ") on link "
+                                    msg << "Domain boundary crossing (" << dom1 << " -> " << dom2 << ") detected on link: "
                                         << hop1.node_id << "::" << hop1.port_id << " <-> "
-                                        << hop2.node_id << "::" << hop2.port_id << " is NOT protected by MACsec";
+                                        << hop2.node_id << "::" << hop2.port_id << ". "
+                                        << "Both link endpoints must have MACsec enabled for cross-domain streams.";
                                     
                                     Violation v;
                                     v.severity  = Severity::ERROR;
                                     v.rule_id   = id();
                                     v.stream_id = stream.id;
-                                    v.node_id   = hop1.node_id;
+                                    v.node_id   = hop1.node_id; // Keep node/port as primary reference point
                                     v.port_id   = hop1.port_id;
                                     v.message   = msg.str();
                                     violations.push_back(v);

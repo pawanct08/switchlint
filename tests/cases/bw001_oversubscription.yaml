@@ -1,0 +1,11 @@
+# tests/cases/bw001_oversubscription.yaml
+topology: ../fixtures/bw_oversubscribed.yaml
+expect:
+  - rule: BW001
+    node: SW1
+    port: p1
+    severity: ERROR
+  - rule: BW001
+    node: SW1
+    port: p2
+    severity: ERROR

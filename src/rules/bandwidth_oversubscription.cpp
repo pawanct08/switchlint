@@ -4,6 +4,7 @@
 #include "rule_engine.hpp"
 #include "path_resolver.hpp"
 #include <unordered_map>
+#include <unordered_set>
 #include <sstream>
 
 namespace switchlint {
@@ -20,6 +21,8 @@ public:
 
         // port_key ("node::port") -> sum of class-A bandwidth_kbps
         std::unordered_map<std::string, uint64_t> port_bandwidth;
+        // stream_id + "::" + port_key -> already counted?
+        std::unordered_set<std::string> counted;
 
         for (const auto& stream : topo.streams) {
             if (stream.tsn_class != 1) continue; // Only care about Class-A
@@ -36,7 +39,11 @@ public:
                         if (nit->second->type != NodeType::SWITCH) continue;
 
                         std::string key = hop.node_id + "::" + hop.port_id;
-                        port_bandwidth[key] += stream.bandwidth_kbps;
+                        std::string counted_key = stream.id + "::" + key;
+                        if (!counted.count(counted_key)) {
+                            port_bandwidth[key] += stream.bandwidth_kbps;
+                            counted.insert(counted_key);
+                        }
                     }
                 }
             }

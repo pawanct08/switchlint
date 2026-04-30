@@ -17,8 +17,9 @@ def run_test(case_path):
     expected = case['expect']
     
     # Run switchlint
-    # Using absolute path for the executable for robustness
-    exe = os.path.join(os.getcwd(), "build", "switchlint.exe")
+    import platform
+    exe_name = "switchlint.exe" if platform.system() == "Windows" else "switchlint"
+    exe = os.path.join(os.getcwd(), "build", exe_name)
     cmd = [exe, "--format", "json", topo_path]
     
     result = subprocess.run(cmd, capture_output=True, text=True)
@@ -47,8 +48,15 @@ def run_test(case_path):
             stream_match   = act.get('stream_id', "") == exp.get('stream', "")
             node_match     = act.get('node_id', "")   == exp.get('node', "")
             port_match     = act.get('port_id', "")   == exp.get('port', "")
-            # Severity in JSON is lowercase, in test case it might be uppercase
-            severity_match = act['severity'].upper() == exp['severity'].upper()
+            # Severity in JSON is lowercase, in test case it might be uppercase.
+            # Also handle WARNING vs WARN.
+            act_sev = act['severity'].upper()
+            if act_sev == "WARNING": act_sev = "WARN"
+            
+            exp_sev = exp['severity'].upper()
+            if exp_sev == "WARNING": exp_sev = "WARN"
+
+            severity_match = act_sev == exp_sev
             
             if rule_match and stream_match and node_match and port_match and severity_match:
                 found = True

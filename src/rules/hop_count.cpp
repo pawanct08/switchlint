@@ -27,7 +27,9 @@ public:
                             switch_hops++;
                         }
                     }
-                    // Since each switch node appears twice in the Path (entry and exit), divide by 2.
+                    // DFS generates path as pairs: {current, exit}, {next, entry}, {next, exit}...
+                    // Therefore, every switch node on the path appears exactly twice: 
+                    // once for the entry port and once for the exit port.
                     int actual_switches = switch_hops / 2;
 
                     if (actual_switches > threshold) {
