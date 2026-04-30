@@ -53,6 +53,7 @@ add_library(switchlint_core STATIC
     src/rules/redundancy.cpp
     src/rules/hop_count.cpp
     src/rules/orphan_detection.cpp
+    src/rules/macsec_validation.cpp
     src/report/text_reporter.cpp
     src/report/json_reporter.cpp
 )

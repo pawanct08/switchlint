@@ -23,6 +23,13 @@ void Topology::build_indexes() {
             port_index[key] = &port;
         }
     }
+
+    node_to_domain.clear();
+    for (const auto& domain : domains) {
+        for (const auto& node_id : domain.nodes) {
+            node_to_domain[node_id] = domain.id;
+        }
+    }
 }
 
 } // namespace switchlint

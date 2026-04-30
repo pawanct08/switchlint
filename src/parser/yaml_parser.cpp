@@ -71,6 +71,14 @@ static Port parse_port(const YAML::Node& n) {
         }
     }
 
+    // MACsec
+    if (n["macsec"]) {
+        const auto& m = n["macsec"];
+        p.macsec.enabled = m["enabled"] ? m["enabled"].as<bool>() : false;
+        p.macsec.sci     = m["sci"]     ? m["sci"].as<uint32_t>() : 0;
+        p.macsec.key_id  = m["key_id"]  ? m["key_id"].as<std::string>() : "";
+    }
+
     // Firewall entries
     if (n["firewall"]) {
         for (const auto& fe : n["firewall"]) {
@@ -183,6 +191,19 @@ Topology parse_yaml(const std::string& path) {
             s.port         = sv["port"].as<uint16_t>();
             s.provider_ecu = sv["provider_ecu"].as<std::string>();
             topo.someip_services.push_back(s);
+        }
+    }
+
+    // Domains
+    if (root["domains"]) {
+        for (const auto& d : root["domains"]) {
+            Domain dom;
+            dom.id = d["id"].as<std::string>();
+            if (d["nodes"]) {
+                for (const auto& n : d["nodes"])
+                    dom.nodes.push_back(n.as<std::string>());
+            }
+            topo.domains.push_back(dom);
         }
     }
 

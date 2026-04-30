@@ -44,6 +44,14 @@ struct FirewallEntry {
     std::string action;      // "permit" | "deny"
 };
 
+// ─── MACsec ───────────────────────────────────────────────────────────────────
+
+struct MACsecConfig {
+    bool        enabled{false};
+    uint32_t    sci{0};     // Secure Channel Identifier
+    std::string key_id;     // which key material is configured
+};
+
 // ─── Port ─────────────────────────────────────────────────────────────────────
 
 struct Port {
@@ -53,6 +61,7 @@ struct Port {
     bool                       tagged{true}; // true = 802.1Q tagged egress
     uint32_t                   line_rate_kbps{1000000}; // default 1Gbps
     PortQoS                    qos;
+    MACsecConfig               macsec;
     std::vector<FirewallEntry> firewall;
 };
 
@@ -113,6 +122,13 @@ struct SomeIPService {
     std::string provider_ecu;
 };
 
+// ─── Domains ──────────────────────────────────────────────────────────────────
+
+struct Domain {
+    std::string              id;
+    std::vector<std::string> nodes;
+};
+
 // ─── Topology (root) ──────────────────────────────────────────────────────────
 
 struct Topology {
@@ -121,10 +137,12 @@ struct Topology {
     std::vector<Stream>         streams;
     std::vector<MulticastGroup> multicast_groups;
     std::vector<SomeIPService>  someip_services;
+    std::vector<Domain>         domains;
 
     // Indexes populated by graph.cpp after parsing
     std::unordered_map<std::string, Node*> node_index;  // node_id → Node*
     std::unordered_map<std::string, Port*> port_index;  // "node_id::port_id" → Port*
+    std::unordered_map<std::string, std::string> node_to_domain; // node_id → domain_id
 
     void build_indexes();
 };
