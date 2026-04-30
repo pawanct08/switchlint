@@ -1,12 +1,12 @@
 # switchlint — Automotive Ethernet Switch Config Validator
 
-> **BMW+Technica AEC 2026 tooling** — catches the exact class of errors identified in BMW's session: missing firewall rules, unrouted multicast streams, TSN stream misconfiguration, and VLAN membership gaps — *before any hardware is touched*.
+> **Automotive Ethernet Validation Tooling** — catches common configuration errors: missing firewall rules, unrouted multicast streams, TSN stream misconfiguration, and VLAN membership gaps — *before any hardware is touched*.
 
 ---
 
 ## Problem Statement
 
-BMW's session identified six concrete failure modes in Automotive Ethernet switch projects:
+Industry experience has identified several concrete failure modes in Automotive Ethernet switch projects:
 
 | # | Failure Mode |
 |---|---|

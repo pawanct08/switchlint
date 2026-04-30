@@ -1,5 +1,5 @@
 // src/rules/firewall_coverage.cpp
-// FW001 — BMW failure mode #1: firewall coverage gap.
+// FW001 — firewall coverage gap.
 // For each stream, every switch port on every path src→dst must have a
 // firewall "permit" entry whose stream_id matches the stream or whose
 // dst_ip matches the stream's multicast_ip.
