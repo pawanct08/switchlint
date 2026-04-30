@@ -1,0 +1,3 @@
+# tests/cases/vlan001_valid.yaml
+topology: ../fixtures/valid_topology.yaml
+expect: [] # No violations expected

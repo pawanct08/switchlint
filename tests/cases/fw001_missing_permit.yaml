@@ -1,4 +1,4 @@
-# tests/cases/missing_vlan.yaml
+# tests/cases/fw001_missing_permit.yaml
 topology: ../fixtures/broken_firewall.yaml
 expect:
   - rule: FW001

@@ -5,8 +5,8 @@
 #include <iostream>
 
 namespace switchlint {
-void print_diff_report(const std::vector<Violation>& old_violations,
-                       const std::vector<Violation>& new_violations,
-                       bool use_color = true,
-                       std::ostream& os = std::cout);
+int print_diff_report(const std::vector<Violation>& old_violations,
+                      const std::vector<Violation>& new_violations,
+                      bool use_color = true,
+                      std::ostream& os = std::cout);
 }

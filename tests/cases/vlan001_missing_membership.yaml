@@ -1,0 +1,8 @@
+# tests/cases/vlan001_missing_membership.yaml
+topology: ../fixtures/broken_vlan.yaml
+expect:
+  - rule: VLAN001
+    stream: cam_front
+    node: SW1
+    port: p2
+    severity: ERROR

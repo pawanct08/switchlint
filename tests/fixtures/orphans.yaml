@@ -1,0 +1,13 @@
+nodes:
+  - id: ECU1
+    type: ecu
+    ports: [{id: p1}]
+  - id: ECU_ORPHAN
+    type: ecu
+    ports: [{id: p1}] # No links to this node
+
+links: []
+streams: []
+someip_services: []
+domains: []
+multicast_groups: []

@@ -28,10 +28,10 @@ static ViolationKey make_key(const Violation& v) {
     return {v.rule_id, v.stream_id, v.node_id, v.port_id};
 }
 
-void print_diff_report(const std::vector<Violation>& old_violations,
-                       const std::vector<Violation>& new_violations,
-                       bool use_color,
-                       std::ostream& os)
+int print_diff_report(const std::vector<Violation>& old_violations,
+                      const std::vector<Violation>& new_violations,
+                      bool use_color,
+                      std::ostream& os)
 {
     std::map<ViolationKey, const Violation*> old_map;
     for (const auto& v : old_violations) old_map[make_key(v)] = &v;
@@ -75,6 +75,8 @@ void print_diff_report(const std::vector<Violation>& old_violations,
     else os << "  " << fixed_count << " fixed\n";
     
     os << "  " << unchanged_count << " unchanged\n";
+
+    return new_count;
 }
 
 }

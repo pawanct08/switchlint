@@ -140,17 +140,18 @@ int main(int argc, char* argv[]) {
         std::vector<switchlint::Violation> v1 = run_validation(input_files[0]);
         std::vector<switchlint::Violation> v2 = run_validation(input_files[1]);
         
+        int new_violations = 0;
         if (output_file.empty()) {
-            switchlint::print_diff_report(v1, v2, use_color, std::cout);
+            new_violations = switchlint::print_diff_report(v1, v2, use_color, std::cout);
         } else {
             std::ofstream ofs(output_file);
             if (!ofs) {
                 std::cerr << "[FATAL] Failed to open output file: " << output_file << '\n';
                 return 2;
             }
-            switchlint::print_diff_report(v1, v2, false, ofs);
+            new_violations = switchlint::print_diff_report(v1, v2, false, ofs);
         }
-        return 0;
+        return (new_violations > 0) ? 1 : 0;
     }
 
     std::vector<switchlint::Violation> violations;

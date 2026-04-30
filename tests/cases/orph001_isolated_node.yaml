@@ -1,0 +1,9 @@
+# tests/cases/orph001_isolated_node.yaml
+topology: ../fixtures/orphans.yaml
+expect:
+  - rule: ORPH001
+    node: ECU1
+    severity: INFO
+  - rule: ORPH001
+    node: ECU_ORPHAN
+    severity: INFO
