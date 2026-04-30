@@ -1,0 +1,6 @@
+# tests/cases/topo001_no_redundant_path.yaml
+topology: ../fixtures/no_redundant_path.yaml
+expect:
+  - rule: TOPO001
+    stream: critical_stream
+    severity: WARN

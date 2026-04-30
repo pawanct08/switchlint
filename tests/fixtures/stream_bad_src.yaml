@@ -1,0 +1,10 @@
+nodes:
+  - id: ECU1
+    type: ecu
+    ports: [{id: p1}]
+
+links: []
+streams:
+  - id: invalid_src
+    src: NON_EXISTENT
+    dst: [ECU1]

@@ -64,7 +64,13 @@ switchlint/
 | `MC001`   | ERROR | Every switch on a multicast stream's path must have the group statically configured |
 | `TSN001`  | ERROR/WARN | CBS shaper must be present with coherent parameters (idleSlope > 0, sendSlope < 0, credit signs) |
 | `TSN002`  | ERROR/WARN | TAS gate control list must be present with non-zero cycle time |
+| `BW001`   | ERROR | Sum of Class-A bandwidth must not exceed 75% of port line rate (IEEE 802.1Qav) |
+| `SD001`   | ERROR | SOME/IP Service/Instance ID collisions and port conflicts on ECUs |
 | `FW001`   | ERROR | Every switch port on a stream's path must have a matching firewall `permit` entry |
+| `TOPO001` | WARN  | Safety-critical streams (safety_level > 0) must have redundant physical paths |
+| `TOPO002` | WARN  | Switch hop count on path must not exceed threshold (default 7) |
+| `SEC001`  | ERROR | Cross-domain links (e.g. adas <-> powertrain) must have MACsec enabled on both ends |
+| `ORPH001` | INFO  | Detection of isolated nodes or missing stream endpoints |
 
 ---
 
@@ -109,6 +115,37 @@ switchlint topology.yaml --fail-on-warn
 
 # List all available rules
 switchlint --list-rules
+
+# Diff mode: Compare violations between two topology versions
+# Exits 1 only if NEW violations are introduced.
+switchlint old.yaml new.yaml --diff
+```
+
+## Baseline & Diff Workflow
+
+In a mature CI environment, you may have legacy violations that cannot be fixed immediately. Use the baseline workflow to prevent regressions:
+
+1. **Establish a baseline** for your project:
+   ```bash
+   switchlint topology.yaml --format json --output .switchlint-baseline.json
+   ```
+
+2. **Run diff in CI** on every Pull Request:
+   ```bash
+   switchlint topology.yaml .switchlint-baseline.json --diff
+   ```
+
+The linter will print `[NEW]`, `[FIXED]`, and `[UNCHANGED]` violations. It will **exit with code 1** only if the `new_count > 0`, allowing you to block PRs that introduce new errors without being blocked by existing ones.
+
+## Violation Suppression
+
+Create a `.switchlintignore` file in your root to silence specific violations:
+
+```yaml
+# .switchlintignore
+- rule: FW001
+  stream: radar_rear
+  reason: "Covered by hardware default-permit on SW2 — verified manually"
 ```
 
 ### Example output

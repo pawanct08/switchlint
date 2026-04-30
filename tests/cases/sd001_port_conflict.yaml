@@ -1,0 +1,6 @@
+# tests/cases/sd001_port_conflict.yaml
+topology: ../fixtures/someip_port_conflict.yaml
+expect:
+  - rule: SD001
+    node: ECU1
+    severity: ERROR

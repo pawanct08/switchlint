@@ -1,6 +1,0 @@
-# tests/cases/topo001_redundancy.yaml
-topology: ../fixtures/no_redundancy.yaml
-expect:
-  - rule: TOPO001
-    stream: critical_stream
-    severity: WARN

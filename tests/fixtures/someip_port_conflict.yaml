@@ -1,0 +1,14 @@
+nodes:
+  - id: ECU1
+    type: ecu
+    ports: [{id: p1}]
+
+someip_services:
+  - service_id: 0x1111
+    instance_id: 0x0001
+    port: 30000
+    provider_ecu: ECU1
+  - service_id: 0x2222
+    instance_id: 0x0001
+    port: 30000
+    provider_ecu: ECU1 # Conflict: same port 30000 on same ECU

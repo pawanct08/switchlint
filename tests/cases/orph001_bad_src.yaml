@@ -1,0 +1,6 @@
+# tests/cases/orph001_bad_src.yaml
+topology: ../fixtures/stream_bad_src.yaml
+expect:
+  - rule: ORPH001
+    stream: invalid_src
+    severity: ERROR

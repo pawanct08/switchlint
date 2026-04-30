@@ -1,5 +1,5 @@
-# tests/cases/orph001_isolated_node.yaml
-topology: ../fixtures/orphans.yaml
+# tests/cases/orph001_orphan.yaml
+topology: ../fixtures/orphan_node.yaml
 expect:
   - rule: ORPH001
     node: ECU1

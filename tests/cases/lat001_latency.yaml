@@ -1,0 +1,6 @@
+# tests/cases/lat001_latency.yaml
+topology: ../fixtures/latency_violation.yaml
+expect:
+  - rule: LAT001
+    stream: latency_critical
+    severity: ERROR

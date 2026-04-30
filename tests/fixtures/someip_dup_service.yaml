@@ -1,0 +1,17 @@
+nodes:
+  - id: ECU1
+    type: ecu
+    ports: [{id: p1}]
+  - id: ECU2
+    type: ecu
+    ports: [{id: p1}]
+
+someip_services:
+  - service_id: 0x1234
+    instance_id: 0x0001
+    port: 30000
+    provider_ecu: ECU1
+  - service_id: 0x1234
+    instance_id: 0x0001
+    port: 30001
+    provider_ecu: ECU2 # Collision: same ID/Instance on different ECUs

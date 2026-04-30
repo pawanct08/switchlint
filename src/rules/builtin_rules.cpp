@@ -17,6 +17,7 @@ std::unique_ptr<Rule> make_redundancy_rule();
 std::unique_ptr<Rule> make_hop_count_rule();
 std::unique_ptr<Rule> make_orphan_detection_rule();
 std::unique_ptr<Rule> make_macsec_validation_rule();
+std::unique_ptr<Rule> make_latency_budget_rule();
 
 void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw) {
     registry.register_rule(make_vlan_membership_rule());
@@ -31,6 +32,7 @@ void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw) {
     registry.register_rule(make_hop_count_rule());
     registry.register_rule(make_orphan_detection_rule());
     registry.register_rule(make_macsec_validation_rule());
+    registry.register_rule(make_latency_budget_rule());
 }
 
 } // namespace switchlint

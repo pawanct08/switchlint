@@ -1,0 +1,8 @@
+# tests/cases/sec001_macsec.yaml
+topology: ../fixtures/macsec_missing.yaml
+expect:
+  - rule: SEC001
+    stream: crossing_stream
+    node: ECU1
+    port: p1
+    severity: ERROR

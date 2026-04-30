@@ -163,6 +163,7 @@ Topology parse_yaml(const std::string& path) {
             stream.tsn_class      = s["tsn_class"]      ? s["tsn_class"].as<uint8_t>()       : 0;
             stream.bandwidth_kbps = s["bandwidth_kbps"] ? s["bandwidth_kbps"].as<uint32_t>() : 0;
             stream.safety_level   = s["safety_level"]   ? s["safety_level"].as<uint8_t>()    : 0;
+            stream.max_latency_us = s["max_latency_us"] ? s["max_latency_us"].as<uint32_t>() : 0;
 
             if (s["multicast_ip"] && !s["multicast_ip"].IsNull()) {
                 stream.multicast_ip = parse_ipv4(s["multicast_ip"].as<std::string>(), true);

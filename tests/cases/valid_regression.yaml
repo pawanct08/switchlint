@@ -1,0 +1,3 @@
+# tests/cases/valid_regression.yaml
+topology: ../fixtures/valid_topology.yaml
+expect: []

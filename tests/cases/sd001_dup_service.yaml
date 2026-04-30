@@ -1,0 +1,6 @@
+# tests/cases/sd001_dup_service.yaml
+topology: ../fixtures/someip_dup_service.yaml
+expect:
+  - rule: SD001
+    node: ECU2
+    severity: ERROR
