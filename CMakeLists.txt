@@ -48,6 +48,8 @@ add_library(switchlint_core STATIC
     src/rules/tsn_cbs.cpp
     src/rules/tsn_tas.cpp
     src/rules/firewall_coverage.cpp
+    src/rules/bandwidth_oversubscription.cpp
+    src/rules/someip_collision.cpp
     src/report/text_reporter.cpp
     src/report/json_reporter.cpp
 )

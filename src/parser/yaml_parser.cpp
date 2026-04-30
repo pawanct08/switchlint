@@ -51,6 +51,7 @@ static Port parse_port(const YAML::Node& n) {
     p.id     = n["id"].as<std::string>();
     p.tagged = n["tagged"] ? n["tagged"].as<bool>() : true;
     p.pvid   = n["pvid"]   ? n["pvid"].as<uint16_t>() : 1;
+    if (n["line_rate_kbps"]) p.line_rate_kbps = n["line_rate_kbps"].as<uint32_t>();
 
     if (n["vlans"]) {
         for (const auto& v : n["vlans"])
@@ -169,6 +170,18 @@ Topology parse_yaml(const std::string& path) {
             g.group_ip  = parse_ipv4(mg["group_ip"].as<std::string>(), true);
             g.switch_id = mg["switch_id"].as<std::string>();
             topo.multicast_groups.push_back(g);
+        }
+    }
+
+    // SOME/IP Services
+    if (root["someip_services"]) {
+        for (const auto& sv : root["someip_services"]) {
+            SomeIPService s;
+            s.service_id   = sv["service_id"].as<uint16_t>();
+            s.instance_id  = sv["instance_id"].as<uint16_t>();
+            s.port         = sv["port"].as<uint16_t>();
+            s.provider_ecu = sv["provider_ecu"].as<std::string>();
+            topo.someip_services.push_back(s);
         }
     }
 

@@ -51,6 +51,7 @@ struct Port {
     std::vector<uint16_t>      vlans;    // VLAN membership list
     uint16_t                   pvid{1};  // port VLAN ID — untagged frames use this
     bool                       tagged{true}; // true = 802.1Q tagged egress
+    uint32_t                   line_rate_kbps{1000000}; // default 1Gbps
     PortQoS                    qos;
     std::vector<FirewallEntry> firewall;
 };
@@ -102,6 +103,15 @@ struct Stream {
     uint32_t                 bandwidth_kbps{0};
 };
 
+// ─── SOME/IP Service ──────────────────────────────────────────────────────────
+
+struct SomeIPService {
+    uint16_t    service_id;
+    uint16_t    instance_id;
+    uint16_t    port;
+    std::string provider_ecu;
+};
+
 // ─── Topology (root) ──────────────────────────────────────────────────────────
 
 struct Topology {
@@ -109,6 +119,7 @@ struct Topology {
     std::vector<Link>           links;
     std::vector<Stream>         streams;
     std::vector<MulticastGroup> multicast_groups;
+    std::vector<SomeIPService>  someip_services;
 
     // Indexes populated by graph.cpp after parsing
     std::unordered_map<std::string, Node*> node_index;  // node_id → Node*

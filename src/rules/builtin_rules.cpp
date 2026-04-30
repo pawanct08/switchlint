@@ -11,6 +11,8 @@ std::unique_ptr<Rule> make_multicast_group_rule();
 std::unique_ptr<Rule> make_tsn_cbs_rule();
 std::unique_ptr<Rule> make_tsn_tas_rule();
 std::unique_ptr<Rule> make_firewall_coverage_rule(bool strict_unicast_fw);
+std::unique_ptr<Rule> make_bandwidth_oversubscription_rule();
+std::unique_ptr<Rule> make_someip_collision_rule();
 
 void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw) {
     registry.register_rule(make_vlan_membership_rule());
@@ -19,6 +21,8 @@ void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw) {
     registry.register_rule(make_tsn_cbs_rule());
     registry.register_rule(make_tsn_tas_rule());
     registry.register_rule(make_firewall_coverage_rule(strict_unicast_fw));
+    registry.register_rule(make_bandwidth_oversubscription_rule());
+    registry.register_rule(make_someip_collision_rule());
 }
 
 } // namespace switchlint
