@@ -101,6 +101,7 @@ struct Stream {
     uint32_t                 multicast_ip{0}; // 0 = unicast
     uint8_t                  tsn_class{0};
     uint32_t                 bandwidth_kbps{0};
+    uint8_t                  safety_level{0}; // 0=none, 1=QM, 2=ASIL-A, ...
 };
 
 // ─── SOME/IP Service ──────────────────────────────────────────────────────────
