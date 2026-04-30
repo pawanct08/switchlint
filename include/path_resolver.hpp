@@ -14,7 +14,7 @@ namespace switchlint {
 /// One hop on a resolved path: the node and the port through which we enter it.
 struct PathHop {
     std::string node_id;
-    std::string port_id;  // entry port on this node (empty for the source)
+    std::string port_id;  // port touched by the stream
 };
 
 using Path = std::vector<PathHop>;

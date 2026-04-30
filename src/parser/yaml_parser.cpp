@@ -6,7 +6,9 @@
 #include <yaml-cpp/yaml.h>
 #include <stdexcept>
 #include <sstream>
-#include <arpa/inet.h>   // inet_pton — Linux; see note for Windows below
+#ifndef _WIN32
+#  include <arpa/inet.h>   // inet_pton — Linux/Unix
+#endif
 
 #ifdef _WIN32
 #  include <winsock2.h>

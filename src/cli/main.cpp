@@ -26,6 +26,7 @@
 
 #ifdef _WIN32
 #  include <windows.h>   // EnableVirtualTerminalProcessing for ANSI colors
+#  undef ERROR
 #endif
 
 static void enable_ansi_windows() {

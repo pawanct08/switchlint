@@ -24,21 +24,26 @@ static void dfs(const std::string&              current,
     for (const auto& link : topo.links) {
         std::string next_node;
         std::string entry_port;
+        std::string exit_port;
 
         if (link.src_node == current) {
             next_node  = link.dst_node;
             entry_port = link.dst_port;
+            exit_port  = link.src_port;
         } else if (link.dst_node == current) {
             next_node  = link.src_node;
             entry_port = link.src_port;
+            exit_port  = link.dst_port;
         } else {
             continue;
         }
 
         if (visited.count(next_node)) continue;
 
+        current_path.push_back({current, exit_port});
         current_path.push_back({next_node, entry_port});
         dfs(next_node, target, topo, visited, current_path, results);
+        current_path.pop_back();
         current_path.pop_back();
     }
 
@@ -53,8 +58,6 @@ std::vector<Path> resolve_paths(const std::string& src_node,
     Path                           current_path;
     std::unordered_set<std::string> visited;
 
-    // Seed with source node (no entry port)
-    current_path.push_back({src_node, ""});
     dfs(src_node, dst_node, topo, visited, current_path, results);
     return results;
 }
