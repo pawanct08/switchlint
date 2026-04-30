@@ -37,7 +37,8 @@ public:
                 v.rule_id  = id();
                 v.node_id  = node.id;
                 v.message  = "Node " + node.id + " is isolated (has no links)";
-                v.line_number = node.line_number;
+                v.source_line = node.source_line;
+                v.source_file = topo.source_file;
                 violations.push_back(v);
             }
         }
@@ -50,7 +51,8 @@ public:
                 v.rule_id   = id();
                 v.stream_id = stream.id;
                 v.message   = "Stream " + stream.id + " source node '" + stream.src_node + "' does not exist";
-                v.line_number = stream.line_number;
+                v.source_line = stream.source_line;
+                v.source_file = topo.source_file;
                 violations.push_back(v);
             }
 
@@ -61,7 +63,8 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "Stream " + stream.id + " destination node '" + dst + "' does not exist";
-                    v.line_number = stream.line_number;
+                    v.source_line = stream.source_line;
+                    v.source_file = topo.source_file;
                     violations.push_back(v);
                 }
             }
@@ -71,7 +74,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_orphan_detection_rule() {
+std::unique_ptr<Rule> make_orphan_detection_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<OrphanDetectionRule>();
 }
 

@@ -27,6 +27,8 @@ static json violation_to_json(const Violation& v) {
     if (!v.stream_id.empty()) j["stream_id"] = v.stream_id;
     if (!v.node_id.empty())   j["node_id"]   = v.node_id;
     if (!v.port_id.empty())   j["port_id"]   = v.port_id;
+    j["source_line"] = v.source_line;
+    if (!v.source_file.empty()) j["source_file"] = v.source_file;
     return j;
 }
 

@@ -43,7 +43,8 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
-                    v.line_number = stream.line_number;
+                    v.source_line = stream.source_line;
+                    v.source_file = topo.source_file;
                     violations.push_back(v);
                     continue;
                 }
@@ -78,7 +79,8 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
-                            v.line_number = port->line_number;
+                            v.source_line = port->source_line;
+                            v.source_file = topo.source_file;
                             violations.push_back(v);
                         };
 
@@ -110,7 +112,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_tsn_cbs_rule() {
+std::unique_ptr<Rule> make_tsn_cbs_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<TSNCBSRule>();
 }
 

@@ -7,14 +7,21 @@ namespace switchlint {
 
 class HopCountRule : public Rule {
 public:
+    explicit HopCountRule(const std::map<std::string, ConfigValue>& config) {
+        if (config.count("max_hops")) {
+            threshold_ = (int)std::get<int64_t>(config.at("max_hops"));
+        }
+    }
+
     std::string id()          const override { return "TOPO002"; }
     std::string description() const override {
-        return "Streams must not exceed 7 switch hops to bound worst-case latency";
+        return "Streams must not exceed " + std::to_string(threshold_) + " switch hops to bound worst-case latency";
     }
 
     std::string explain() const override {
         return "TOPO002 — Max Switch Hops\n"
                "Standard: Automotive TSN Profiles. Latency bounds assume a max of 7 switch hops.\n"
+               "Current threshold: " + std::to_string(threshold_) + "\n"
                "Excessive hops accumulate jitter and frame queuing delay beyond the budget\n"
                "modeled by standard TSN calculus, leading to non-deterministic arrival times.\n"
                "Fix: Re-route the stream through fewer switches or reorganize the network spine.\n\n"
@@ -23,7 +30,6 @@ public:
 
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
-        const int threshold = 7;
 
         for (const auto& stream : topo.streams) {
             for (const auto& dst : stream.dst_nodes) {
@@ -41,14 +47,15 @@ public:
                     // once for the entry port and once for the exit port.
                     int actual_switches = switch_hops / 2;
 
-                    if (actual_switches > threshold) {
+                    if (actual_switches > threshold_) {
                         Violation v;
                         v.severity  = Severity::WARN;
                         v.rule_id   = id();
                         v.stream_id = stream.id;
                         v.message   = "Stream " + stream.id + ": " + std::to_string(actual_switches) + 
                                       " switch hops on path to " + dst + " — latency budget at risk";
-                        v.line_number = stream.line_number;
+                        v.source_line = stream.source_line;
+                        v.source_file = topo.source_file;
                         violations.push_back(v);
                     }
                 }
@@ -56,10 +63,13 @@ public:
         }
         return violations;
     }
+
+private:
+    int threshold_{7};
 };
 
-std::unique_ptr<Rule> make_hop_count_rule() {
-    return std::make_unique<HopCountRule>();
+std::unique_ptr<Rule> make_hop_count_rule(const std::map<std::string, ConfigValue>& config) {
+    return std::make_unique<HopCountRule>(config);
 }
 
 } // namespace switchlint

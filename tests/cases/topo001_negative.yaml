@@ -1,0 +1,5 @@
+# tests/cases/topo001_negative.yaml
+topology: ../fixtures/valid_topology.yaml
+expect_absent:
+  - rule: TOPO001
+    severity: ERROR

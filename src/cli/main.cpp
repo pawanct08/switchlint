@@ -18,6 +18,34 @@
 #include "../report/json_reporter.hpp"
 #include "../report/diff_reporter.hpp"
 #include "../report/sarif_reporter.hpp"
+#include <nlohmann/json.hpp>
+#include <toml++/toml.hpp>
+
+namespace switchlint {
+RuleConfig parse_config(const std::string& path) {
+    RuleConfig rc;
+    try {
+        toml::table tbl = toml::parse_file(path);
+        if (auto* rules = tbl["rules"].as_table()) {
+            for (auto&& [id, rule_tbl_node] : *rules) {
+                if (auto* rule_tbl = rule_tbl_node.as_table()) {
+                    std::map<std::string, ConfigValue> params;
+                    for (auto&& [key, val] : *rule_tbl) {
+                        if (val.is_string()) params[std::string(key)] = val.as_string()->get();
+                        else if (val.is_integer()) params[std::string(key)] = val.as_integer()->get();
+                        else if (val.is_floating_point()) params[std::string(key)] = val.as_floating_point()->get();
+                        else if (val.is_boolean()) params[std::string(key)] = val.as_boolean()->get();
+                    }
+                    rc[std::string(id)] = params;
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Warning: Failed to parse config file " << path << ": " << e.what() << "\n";
+    }
+    return rc;
+}
+} // namespace switchlint
 
 #include <algorithm>
 #include <cstdlib>
@@ -47,6 +75,7 @@ static void print_usage(const char* prog) {
         "Options:\n"
         "  --format text|json      Output format  (default: text)\n"
         "  --output <file>         Write output to file\n"
+        "  --config <file.toml>    Override rule thresholds\n"
         "  --rules RULE1,RULE2     Run only specific rules\n"
         "  --list-rules            List all rules and exit\n"
         "  --explain <rule>        Explain a rule and its rationale\n"
@@ -54,6 +83,7 @@ static void print_usage(const char* prog) {
         "  --fail-on-warn          Exit 1 on warnings too\n"
         "  --strict-unicast-fw     Enforce firewall rules on unicast streams\n"
         "  --diff                  Compare violations between two topologies\n"
+        "  --batch                 Run validation on multiple topologies\n"
         "  --help                  Show this message\n";
 }
 
@@ -63,6 +93,7 @@ int main(int argc, char* argv[]) {
     // ─── argument parsing ──────────────────────────────────────────────────
     std::string format      = "text";
     std::string output_file;
+    std::string config_file;
     std::string rules_filter;
     std::vector<std::string> input_files;
     bool use_color      = true;
@@ -70,6 +101,7 @@ int main(int argc, char* argv[]) {
     bool list_rules_opt = false;
     bool strict_unicast_fw = false;
     bool diff_mode      = false;
+    bool batch_mode     = false;
     std::string explain_rule;
 
     for (int i = 1; i < argc; ++i) {
@@ -91,10 +123,14 @@ int main(int argc, char* argv[]) {
             format = argv[++i];
         } else if (arg == "--output" && i + 1 < argc) {
             output_file = argv[++i];
+        } else if (arg == "--config" && i + 1 < argc) {
+            config_file = argv[++i];
         } else if (arg == "--rules" && i + 1 < argc) {
             rules_filter = argv[++i];
         } else if (arg == "--diff") {
             diff_mode = true;
+        } else if (arg == "--batch") {
+            batch_mode = true;
         } else if (arg[0] != '-') {
             input_files.push_back(arg);
         } else {
@@ -105,8 +141,13 @@ int main(int argc, char* argv[]) {
     }
 
     // ─── build rule registry ───────────────────────────────────────────────
+    switchlint::RuleConfig rule_cfg;
+    if (!config_file.empty()) {
+        rule_cfg = switchlint::parse_config(config_file);
+    }
+
     switchlint::RuleRegistry registry;
-    switchlint::register_builtin_rules(registry, strict_unicast_fw);
+    switchlint::register_builtin_rules(registry, rule_cfg, strict_unicast_fw);
 
     if (list_rules_opt) {
         for (const auto& [id, desc] : registry.list_rules())
@@ -162,6 +203,43 @@ int main(int argc, char* argv[]) {
             new_violations = switchlint::print_diff_report(v1, v2, false, ofs);
         }
         return (new_violations > 0) ? 1 : 0;
+    }
+
+    if (batch_mode) {
+        using json = nlohmann::json;
+        json batch_report;
+        batch_report["summary"]["total_topologies"] = input_files.size();
+        int topologies_with_errors = 0;
+        batch_report["topologies"] = json::array();
+
+        for (const auto& path : input_files) {
+            json entry;
+            entry["file"] = path;
+            try {
+                auto v = run_validation(path);
+                int e = 0, w = 0;
+                for (const auto& viol : v) {
+                    if (viol.severity == switchlint::Severity::ERROR) e++;
+                    else if (viol.severity == switchlint::Severity::WARN) w++;
+                }
+                entry["errors"] = e;
+                entry["warnings"] = w;
+                if (e > 0) topologies_with_errors++;
+            } catch (const std::exception& ex) {
+                entry["error"] = ex.what();
+                topologies_with_errors++;
+            }
+            batch_report["topologies"].push_back(entry);
+        }
+        batch_report["summary"]["topologies_with_errors"] = topologies_with_errors;
+
+        if (output_file.empty()) {
+            std::cout << batch_report.dump(2) << std::endl;
+        } else {
+            std::ofstream ofs(output_file);
+            ofs << batch_report.dump(2) << std::endl;
+        }
+        return (topologies_with_errors > 0) ? 1 : 0;
     }
 
     std::vector<switchlint::Violation> violations;

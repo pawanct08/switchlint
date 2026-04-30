@@ -57,10 +57,10 @@ void print_sarif_report(const std::vector<Violation>& violations, std::ostream& 
                 {
                     {"physicalLocation", {
                         {"artifactLocation", {
-                            {"uri", "topology.yaml"} // Ideally we'd pass the actual input filename here
+                            {"uri", v.source_file.empty() ? "topology.yaml" : v.source_file}
                         }},
                         {"region", {
-                            {"startLine", v.line_number}
+                            {"startLine", v.source_line > 0 ? v.source_line : 1}
                         }}
                     }}
                 }

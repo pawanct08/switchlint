@@ -20,7 +20,7 @@ filter(const std::vector<switchlint::Violation>& all, const std::string& rule) {
 TEST(FW001, ValidTopologyProducesNoViolations) {
     auto topo = switchlint::parse_yaml(std::string(FIXTURE_DIR) + "/valid_topology.yaml");
     switchlint::RuleRegistry reg;
-    switchlint::register_builtin_rules(reg, true);
+    switchlint::register_builtin_rules(reg, {}, true);
     auto v = filter(reg.run_all(topo), "FW001");
     EXPECT_TRUE(v.empty()) << "No FW001 violations expected on valid topology";
 }
@@ -28,7 +28,7 @@ TEST(FW001, ValidTopologyProducesNoViolations) {
 TEST(FW001, MissingPermitEntryProducesError) {
     auto topo = switchlint::parse_yaml(std::string(FIXTURE_DIR) + "/broken_firewall.yaml");
     switchlint::RuleRegistry reg;
-    switchlint::register_builtin_rules(reg, true);
+    switchlint::register_builtin_rules(reg, {}, true);
     auto v = filter(reg.run_all(topo), "FW001");
     ASSERT_FALSE(v.empty()) << "Expected FW001 violation on SW1::p2";
     EXPECT_EQ(v[0].severity, switchlint::Severity::ERROR);
@@ -66,7 +66,7 @@ TEST(FW001, DenyEntryDoesNotSatisfyCoverage) {
     topo.build_indexes();
 
     switchlint::RuleRegistry reg;
-    switchlint::register_builtin_rules(reg, true);
+    switchlint::register_builtin_rules(reg, {}, true);
     auto v = filter(reg.run_all(topo), "FW001");
     ASSERT_FALSE(v.empty()) << "Deny entry should not satisfy FW001 permit requirement";
 }
@@ -101,7 +101,7 @@ TEST(FW001, PermitByMulticastIpMatchesStream) {
     topo.build_indexes();
 
     switchlint::RuleRegistry reg;
-    switchlint::register_builtin_rules(reg, true);
+    switchlint::register_builtin_rules(reg, {}, true);
     auto v = filter(reg.run_all(topo), "FW001");
     EXPECT_TRUE(v.empty()) << "Permit by matching dst_ip should satisfy FW001";
 }
@@ -133,7 +133,7 @@ TEST(FW001, StreamIdOnlyMatchWithPermit) {
     topo.build_indexes();
 
     switchlint::RuleRegistry reg;
-    switchlint::register_builtin_rules(reg, true);
+    switchlint::register_builtin_rules(reg, {}, true);
     auto v = filter(reg.run_all(topo), "FW001");
     EXPECT_TRUE(v.empty()) << "stream_id permit match should satisfy FW001";
 }

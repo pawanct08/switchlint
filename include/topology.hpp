@@ -69,7 +69,7 @@ struct Port {
     MACsecConfig               macsec;
     std::vector<FirewallEntry> firewall;
     std::optional<StormControl> storm_control;
-    int                        line_number{1};
+    uint32_t                    source_line{0};
 };
 
 // ─── Node (ECU or Switch) ─────────────────────────────────────────────────────
@@ -84,7 +84,7 @@ struct Node {
     std::string       id;
     NodeType          type{NodeType::ECU};
     std::vector<Port> ports;
-    int               line_number{1};
+    uint32_t          source_line{0};
 };
 
 // ─── Link ─────────────────────────────────────────────────────────────────────
@@ -120,7 +120,7 @@ struct Stream {
     uint32_t                 bandwidth_kbps{0};
     uint8_t                  safety_level{0}; // 0=none, 1=QM, 2=ASIL-A, ...
     uint32_t                 max_latency_us{0}; // 0 = no constraint
-    int                      line_number{1};
+    uint32_t                 source_line{0};
 };
 
 // ─── SOME/IP Service ──────────────────────────────────────────────────────────
@@ -130,7 +130,7 @@ struct SomeIPService {
     uint16_t    instance_id;
     uint16_t    port;
     std::string provider_ecu;
-    int         line_number{1};
+    uint32_t    source_line{0};
 };
 
 // ─── Domains ──────────────────────────────────────────────────────────────────
@@ -149,6 +149,7 @@ struct Topology {
     std::vector<MulticastGroup> multicast_groups;
     std::vector<SomeIPService>  someip_services;
     std::vector<Domain>         domains;
+    std::string                 source_file;
 
     // Indexes populated by graph.cpp after parsing
     std::unordered_map<std::string, Node*> node_index;  // node_id → Node*

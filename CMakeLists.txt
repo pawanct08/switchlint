@@ -26,6 +26,14 @@ FetchContent_Declare(
 set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(nlohmann_json)
 
+# tomlplusplus (header-only)
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG        v3.4.0
+)
+FetchContent_MakeAvailable(tomlplusplus)
+
 # GoogleTest
 FetchContent_Declare(
     googletest
@@ -34,6 +42,14 @@ FetchContent_Declare(
 )
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
+
+# pybind11
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG        v2.11.1
+)
+FetchContent_MakeAvailable(pybind11)
 
 # ─── Core library ────────────────────────────────────────────────────────────
 add_library(switchlint_core STATIC
@@ -70,6 +86,7 @@ target_include_directories(switchlint_core PUBLIC
 target_link_libraries(switchlint_core PUBLIC
     yaml-cpp::yaml-cpp
     nlohmann_json::nlohmann_json
+    tomlplusplus::tomlplusplus
 )
 
 # Windows: link Winsock for inet_pton
@@ -78,8 +95,9 @@ if(WIN32)
 endif()
 
 # ─── CLI executable ──────────────────────────────────────────────────────────
-add_executable(switchlint src/cli/main.cpp)
-target_link_libraries(switchlint PRIVATE switchlint_core)
+add_executable(switchlint_cli src/cli/main.cpp)
+target_link_libraries(switchlint_cli PRIVATE switchlint_core)
+set_target_properties(switchlint_cli PROPERTIES OUTPUT_NAME "switchlint")
 
 # ─── Tests ───────────────────────────────────────────────────────────────────
 enable_testing()
@@ -107,3 +125,10 @@ target_compile_definitions(switchlint_tests PRIVATE
 
 include(GoogleTest)
 gtest_discover_tests(switchlint_tests)
+
+# ─── Python Bindings ─────────────────────────────────────────────────────────
+pybind11_add_module(switchlint bindings/switchlint_py.cpp)
+target_link_libraries(switchlint PRIVATE switchlint_core)
+if(MINGW)
+    target_link_options(switchlint PRIVATE "-static-libgcc" "-static-libstdc++")
+endif()

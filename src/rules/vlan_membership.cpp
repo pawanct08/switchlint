@@ -70,7 +70,8 @@ public:
                             v.node_id   = hop.node_id;
                             v.port_id   = hop.port_id;
                             v.message   = msg.str();
-                            v.line_number = it->second->line_number;
+                            v.source_line = it->second->source_line;
+                            v.source_file = topo.source_file;
                             violations.push_back(v);
                         }
                     }
@@ -82,7 +83,8 @@ public:
 };
 
 // Self-registration helper called by register_builtin_rules()
-std::unique_ptr<Rule> make_vlan_membership_rule() {
+std::unique_ptr<Rule> make_vlan_membership_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<VlanMembershipRule>();
 }
 

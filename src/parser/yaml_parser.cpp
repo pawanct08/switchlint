@@ -49,7 +49,7 @@ static Port parse_port(const YAML::Node& n) {
     if (!n["id"]) throw std::runtime_error("Port missing 'id' field");
     Port p;
     p.id = n["id"].as<std::string>();
-    p.line_number = n.Mark().line + 1; // 0-indexed to 1-indexed
+    p.source_line = n.Mark().line + 1; // 0-indexed to 1-indexed
     p.tagged = n["tagged"] ? n["tagged"].as<bool>() : true;
     p.pvid   = n["pvid"]   ? n["pvid"].as<uint16_t>() : 1;
     if (n["line_rate_kbps"]) p.line_rate_kbps = n["line_rate_kbps"].as<uint32_t>();
@@ -109,7 +109,7 @@ static Node parse_node(const YAML::Node& n) {
     if (!n["id"]) throw std::runtime_error("Node missing 'id' field");
     Node node;
     node.id = n["id"].as<std::string>();
-    node.line_number = n.Mark().line + 1;
+    node.source_line = n.Mark().line + 1;
 
     std::string type_str = n["type"] ? n["type"].as<std::string>() : "ecu";
     node.type = (type_str == "switch") ? NodeType::SWITCH : NodeType::ECU;
@@ -133,6 +133,7 @@ Topology parse_yaml(const std::string& path) {
     }
 
     Topology topo;
+    topo.source_file = path;
 
     // ECUs / switches — both live under "ecus" key for FLYNC compat
     if (root["ecus"]) {
@@ -163,7 +164,7 @@ Topology parse_yaml(const std::string& path) {
         for (const auto& s : root["streams"]) {
             Stream stream;
             stream.id = s["id"].as<std::string>();
-            stream.line_number = s.Mark().line + 1;
+            stream.source_line = s.Mark().line + 1;
             stream.src_node = s["src"].as<std::string>();
 
             if (s["dst"]) {
@@ -203,7 +204,7 @@ Topology parse_yaml(const std::string& path) {
             s.instance_id  = sv["instance_id"].as<uint16_t>();
             s.port         = sv["port"].as<uint16_t>();
             s.provider_ecu = sv["provider_ecu"].as<std::string>();
-            s.line_number  = sv.Mark().line + 1;
+            s.source_line  = sv.Mark().line + 1;
             topo.someip_services.push_back(s);
         }
     }

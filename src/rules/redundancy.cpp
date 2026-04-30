@@ -37,7 +37,8 @@ public:
                     v.message   = "Stream " + stream.id + " (safety_level=" + std::to_string((int)stream.safety_level) +
                                   ") has only " + std::to_string(paths.size()) + " path(s) to " + dst + 
                                   ". Redundant path is required for safety.";
-                    v.line_number = stream.line_number;
+                    v.source_line = stream.source_line;
+                    v.source_file = topo.source_file;
                     violations.push_back(v);
                 }
             }
@@ -46,7 +47,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_redundancy_rule() {
+std::unique_ptr<Rule> make_redundancy_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<RedundancyRule>();
 }
 

@@ -11,14 +11,22 @@ namespace switchlint {
 
 class BandwidthOversubscriptionRule : public Rule {
 public:
+    explicit BandwidthOversubscriptionRule(const std::map<std::string, ConfigValue>& config) {
+        if (config.count("utilization_limit")) {
+            limit_ratio_ = std::get<double>(config.at("utilization_limit"));
+        }
+    }
+
     std::string id()          const override { return "BW001"; }
     std::string description() const override {
-        return "Cumulative class-A stream bandwidth must not exceed 75% of switch port line rate";
+        return "Cumulative class-A stream bandwidth must not exceed " + 
+               std::to_string((int)(limit_ratio_ * 100)) + "% of switch port line rate";
     }
 
     std::string explain() const override {
         return "BW001 — Bandwidth Oversubscription\n"
                "Standard: IEEE 802.1Qav §L.2. Reserved bandwidth for CBS classes must not exceed 75%.\n"
+               "Current limit: " + std::to_string((int)(limit_ratio_ * 100)) + "%\n"
                "Exceeding this limit prevents the shaper from guaranteeing the worst-case latency\n"
                "and can cause frame drops for lower-priority or best-effort traffic.\n"
                "Fix: Reduce stream bandwidths or upgrade link speeds (e.g., 100M to 1G).\n\n"
@@ -64,7 +72,7 @@ public:
             if (pit == topo.port_index.end()) continue;
             const Port* port = pit->second;
 
-            uint64_t limit = static_cast<uint64_t>(port->line_rate_kbps * 0.75);
+            uint64_t limit = static_cast<uint64_t>(port->line_rate_kbps * limit_ratio_);
             if (total_bw > limit) {
                 // We need the node ID and port ID for the violation. They are in the key.
                 size_t sep = key.find("::");
@@ -73,7 +81,8 @@ public:
 
                 std::ostringstream msg;
                 msg << "Port " << key << " is oversubscribed by class-A streams: "
-                    << total_bw << " kbps used, but limit is " << limit << " kbps (75% of "
+                    << total_bw << " kbps used, but limit is " << limit << " kbps ("
+                    << (int)(limit_ratio_ * 100) << "% of "
                     << port->line_rate_kbps << ")";
 
                 Violation v;
@@ -82,17 +91,21 @@ public:
                 v.node_id  = node_id;
                 v.port_id  = port_id;
                 v.message  = msg.str();
-                v.line_number = port->line_number;
+                v.source_line = port->source_line;
+                v.source_file = topo.source_file;
                 violations.push_back(v);
             }
         }
 
         return violations;
     }
+
+private:
+    double limit_ratio_{0.75};
 };
 
-std::unique_ptr<Rule> make_bandwidth_oversubscription_rule() {
-    return std::make_unique<BandwidthOversubscriptionRule>();
+std::unique_ptr<Rule> make_bandwidth_oversubscription_rule(const std::map<std::string, ConfigValue>& config) {
+    return std::make_unique<BandwidthOversubscriptionRule>(config);
 }
 
 } // namespace switchlint

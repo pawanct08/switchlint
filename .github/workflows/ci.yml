@@ -1,6 +1,10 @@
 name: CI
 on: [push, pull_request]
 
+permissions:
+  security-events: write
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: ubuntu-22.04
@@ -26,12 +30,15 @@ jobs:
       - name: Lint valid topology (smoke test)
         run: ./build/switchlint tests/fixtures/valid_topology.yaml
 
-      - name: Generate SARIF
-        run: ./build/switchlint tests/fixtures/valid_topology.yaml --format sarif --output results.sarif
+      - name: Generate SARIF report
+        run: |
+          ./build/switchlint tests/fixtures/full_example.yaml \
+            --format sarif --output results.sarif || true
         if: always()
 
-      - name: Upload SARIF
-        uses: github/codeql-action/upload-sarif@v3
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v4
+        if: always()
         with:
           sarif_file: results.sarif
-        if: always()
+          category: switchlint

@@ -49,7 +49,8 @@ public:
                     v.rule_id  = id();
                     v.node_id  = svc.provider_ecu;
                     v.message  = msg.str();
-                    v.line_number = svc.line_number;
+                    v.source_line = svc.source_line;
+                    v.source_file = topo.source_file;
                     violations.push_back(v);
                 }
             } else {
@@ -67,7 +68,8 @@ public:
                 v.rule_id  = id();
                 v.node_id  = svc.provider_ecu;
                 v.message  = msg.str();
-                v.line_number = svc.line_number;
+                v.source_line = svc.source_line;
+                v.source_file = topo.source_file;
                 violations.push_back(v);
             } else {
                 ecu_port_map[svc.provider_ecu].insert(svc.port);
@@ -78,7 +80,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_someip_collision_rule() {
+std::unique_ptr<Rule> make_someip_collision_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<SomeIPCollisionRule>();
 }
 

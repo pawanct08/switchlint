@@ -8,8 +8,15 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
+#include <variant>
 
 namespace switchlint {
+
+/// Generic configuration value
+using ConfigValue = std::variant<std::string, int64_t, double, bool>;
+/// Rule-specific configuration map
+using RuleConfig = std::map<std::string, std::map<std::string, ConfigValue>>;
 
 /// Abstract base class for all validation rules.
 class Rule {
@@ -50,6 +57,8 @@ private:
 };
 
 /// Populate the registry with all built-in rules.
-void register_builtin_rules(RuleRegistry& registry, bool strict_unicast_fw = false);
+void register_builtin_rules(RuleRegistry& registry, 
+                            const RuleConfig& config = {},
+                            bool strict_unicast_fw = false);
 
 } // namespace switchlint

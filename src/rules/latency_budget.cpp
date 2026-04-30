@@ -12,6 +12,12 @@ static constexpr uint32_t MAX_FRAME_BITS = 12176; // 1522 bytes standard Etherne
 
 class LatencyBudgetRule : public Rule {
 public:
+    explicit LatencyBudgetRule(const std::map<std::string, ConfigValue>& config) {
+        if (config.count("propagation_delay_per_hop_ns")) {
+            prop_delay_ns_ = std::get<int64_t>(config.at("propagation_delay_per_hop_ns"));
+        }
+    }
+
     std::string id()          const override { return "LAT001"; }
     std::string description() const override {
         return "CBS Class-A streams must not exceed their configured end-to-end latency budget (IEEE 802.1Qav)";
@@ -19,7 +25,8 @@ public:
 
     std::string explain() const override {
         return "LAT001 — Latency Budget Overrun\n"
-               "Standard: IEEE 802.1Qav (CBS). Deterministic delay is calculated as Σ(max_frame_size / idleSlope).\n"
+               "Standard: IEEE 802.1Qav (CBS). Deterministic delay is calculated as Σ(max_frame_size / idleSlope + propagation_delay).\n"
+               "Current propagation delay per hop: " + std::to_string(prop_delay_ns_) + " ns\n"
                "If the calculated delay exceeds the application budget, the ECU control loop may\n"
                "become unstable due to stale data arrival, risking physical system damage.\n"
                "Fix: Increase 'idle_slope_kbps' for the class or decrease the stream's 'bandwidth_kbps'.\n\n"
@@ -36,7 +43,7 @@ public:
             for (const auto& dst : stream.dst_nodes) {
                 auto paths = resolve_stream_paths(stream, dst, topo);
                 for (const auto& path : paths) {
-                    uint64_t total_delay_us = 0;
+                    uint64_t total_delay_ns = 0;
                     bool path_coherent = true;
                     std::unordered_set<std::string> counted_switches;
                     for (const auto& hop : path) {
@@ -55,7 +62,9 @@ public:
                         const auto& cbs_opt = pit->second->qos.cbs_class_a;
                         if (cbs_opt.has_value() && cbs_opt->idle_slope_kbps > 0) {
                             // IEEE 802.1Qav simplified worst-case per-hop delay
-                            total_delay_us += (MAX_FRAME_BITS * 1000ULL) / cbs_opt->idle_slope_kbps;
+                            // bits * 10^9 (ns/s) / bits/s (kbps*1000)
+                            total_delay_ns += (MAX_FRAME_BITS * 1000000ULL) / cbs_opt->idle_slope_kbps;
+                            total_delay_ns += prop_delay_ns_;
                         } else {
                             // If CBS is missing or invalid on a path port, we can't calculate latency reliably
                             path_coherent = false;
@@ -63,6 +72,7 @@ public:
                         }
                     }
 
+                    uint64_t total_delay_us = total_delay_ns / 1000;
                     if (path_coherent && total_delay_us > stream.max_latency_us) {
                         std::ostringstream msg;
                         msg << "Stream " << stream.id << " exceeds latency budget: "
@@ -74,7 +84,8 @@ public:
                         v.rule_id   = id();
                         v.stream_id = stream.id;
                         v.message   = msg.str();
-                        v.line_number = stream.line_number;
+                        v.source_line = stream.source_line;
+                        v.source_file = topo.source_file;
                         violations.push_back(v);
                     }
                 }
@@ -82,10 +93,13 @@ public:
         }
         return violations;
     }
+
+private:
+    int64_t prop_delay_ns_{0};
 };
 
-std::unique_ptr<Rule> make_latency_budget_rule() {
-    return std::make_unique<LatencyBudgetRule>();
+std::unique_ptr<Rule> make_latency_budget_rule(const std::map<std::string, ConfigValue>& config) {
+    return std::make_unique<LatencyBudgetRule>(config);
 }
 
 } // namespace switchlint

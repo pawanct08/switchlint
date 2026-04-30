@@ -3,6 +3,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace switchlint {
 
@@ -24,7 +25,8 @@ struct Violation {
     std::string node_id;
     std::string port_id;
     std::string message;
-    int         line_number{1};
+    uint32_t    source_line{0};
+    std::string source_file;
 };
 
 struct Suppression {

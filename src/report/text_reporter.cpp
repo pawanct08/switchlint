@@ -31,7 +31,11 @@ void print_text_report(const std::vector<Violation>& violations,
         if (use_color) os << BOLD << color;
         os << prefix;
         if (use_color) os << RESET;
-        os << " " << v.message << '\n';
+        os << " " << v.message;
+        if (v.source_line > 0) {
+            os << " (line " << v.source_line << ")";
+        }
+        os << '\n';
     }
 
     // Summary line

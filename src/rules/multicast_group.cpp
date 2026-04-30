@@ -41,7 +41,8 @@ public:
                     v.rule_id   = id();
                     v.stream_id = stream.id;
                     v.message   = "No physical path found from " + stream.src_node + " to " + dst;
-                    v.line_number = stream.line_number;
+                    v.source_line = stream.source_line;
+                    v.source_file = topo.source_file;
                     violations.push_back(v);
                     continue;
                 }
@@ -81,7 +82,8 @@ public:
                             v.stream_id = stream.id;
                             v.node_id   = sw_id;
                             v.message   = msg.str();
-                            v.line_number = nit->second->line_number;
+                            v.source_line = nit->second->source_line;
+                            v.source_file = topo.source_file;
                             violations.push_back(v);
                         }
                     }
@@ -92,7 +94,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_multicast_group_rule() {
+std::unique_ptr<Rule> make_multicast_group_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<MulticastGroupRule>();
 }
 

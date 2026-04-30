@@ -80,7 +80,8 @@ public:
                                     v.node_id   = hop1.node_id; // Keep node/port as primary reference point
                                     v.port_id   = hop1.port_id;
                                     v.message   = msg.str();
-                                    v.line_number = p1 ? p1->line_number : stream.line_number;
+                                    v.source_line = p1 ? p1->source_line : stream.source_line;
+                                    v.source_file = topo.source_file;
                                     violations.push_back(v);
                                 }
                             }
@@ -94,7 +95,8 @@ public:
     }
 };
 
-std::unique_ptr<Rule> make_macsec_validation_rule() {
+std::unique_ptr<Rule> make_macsec_validation_rule(const std::map<std::string, ConfigValue>& config) {
+    (void)config;
     return std::make_unique<MACsecValidationRule>();
 }
 
