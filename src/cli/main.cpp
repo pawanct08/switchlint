@@ -16,6 +16,7 @@
 #include "../parser/yaml_parser.hpp"
 #include "../report/text_reporter.hpp"
 #include "../report/json_reporter.hpp"
+#include "../report/diff_reporter.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -50,6 +51,7 @@ static void print_usage(const char* prog) {
         "  --no-color              Disable ANSI colors\n"
         "  --fail-on-warn          Exit 1 on warnings too\n"
         "  --strict-unicast-fw     Enforce firewall rules on unicast streams\n"
+        "  --diff                  Compare violations between two topologies\n"
         "  --help                  Show this message\n";
 }
 
@@ -60,11 +62,12 @@ int main(int argc, char* argv[]) {
     std::string format      = "text";
     std::string output_file;
     std::string rules_filter;
-    std::string input_file;
+    std::vector<std::string> input_files;
     bool use_color      = true;
     bool fail_on_warn   = false;
     bool list_rules_opt = false;
     bool strict_unicast_fw = false;
+    bool diff_mode      = false;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -85,8 +88,10 @@ int main(int argc, char* argv[]) {
             output_file = argv[++i];
         } else if (arg == "--rules" && i + 1 < argc) {
             rules_filter = argv[++i];
+        } else if (arg == "--diff") {
+            diff_mode = true;
         } else if (arg[0] != '-') {
-            input_file = arg;
+            input_files.push_back(arg);
         } else {
             std::cerr << "Unknown option: " << arg << '\n';
             print_usage(argv[0]);
@@ -104,38 +109,70 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    if (input_file.empty()) {
+    if (input_files.empty()) {
         std::cerr << "Error: no input file specified.\n";
         print_usage(argv[0]);
         return 2;
     }
 
-    // ─── parse topology ────────────────────────────────────────────────────
-    switchlint::Topology topo;
+    if (diff_mode && input_files.size() < 2) {
+        std::cerr << "Error: --diff mode requires two input files.\n";
+        return 2;
+    }
+
+    auto run_validation = [&](const std::string& path) {
+        switchlint::Topology topo = switchlint::parse_yaml(path);
+        std::vector<switchlint::Violation> v;
+        if (rules_filter.empty()) {
+            v = registry.run_all(topo);
+        } else {
+            std::istringstream ss(rules_filter);
+            std::string token;
+            while (std::getline(ss, token, ',')) {
+                auto res = registry.run(token, topo);
+                v.insert(v.end(), res.begin(), res.end());
+            }
+        }
+        return v;
+    };
+
+    if (diff_mode) {
+        std::vector<switchlint::Violation> v1 = run_validation(input_files[0]);
+        std::vector<switchlint::Violation> v2 = run_validation(input_files[1]);
+        
+        if (output_file.empty()) {
+            switchlint::print_diff_report(v1, v2, use_color, std::cout);
+        } else {
+            std::ofstream ofs(output_file);
+            if (!ofs) {
+                std::cerr << "[FATAL] Failed to open output file: " << output_file << '\n';
+                return 2;
+            }
+            switchlint::print_diff_report(v1, v2, false, ofs);
+        }
+        return 0;
+    }
+
+    std::vector<switchlint::Violation> violations;
     try {
-        topo = switchlint::parse_yaml(input_file);
+        violations = run_validation(input_files[0]);
     } catch (const std::exception& e) {
         std::cerr << "[FATAL] " << e.what() << '\n';
         return 2;
     }
 
-    // ─── run rules ─────────────────────────────────────────────────────────
-    std::vector<switchlint::Violation> violations;
-    try {
-        if (rules_filter.empty()) {
-            violations = registry.run_all(topo);
-        } else {
-            // Split comma-separated rule ids
-            std::istringstream ss(rules_filter);
-            std::string token;
-            while (std::getline(ss, token, ',')) {
-                auto v = registry.run(token, topo);
-                violations.insert(violations.end(), v.begin(), v.end());
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "[FATAL] Rule execution error: " << e.what() << '\n';
-        return 2;
+    // ─── apply suppressions ────────────────────────────────────────────────
+    auto suppressions = switchlint::parse_suppressions(".switchlintignore");
+    if (!suppressions.empty()) {
+        violations.erase(std::remove_if(violations.begin(), violations.end(),
+            [&](const switchlint::Violation& v) {
+                for (const auto& s : suppressions) {
+                    bool rule_match   = s.rule_id.empty()   || s.rule_id == v.rule_id;
+                    bool stream_match = s.stream_id.empty() || s.stream_id == v.stream_id;
+                    if (rule_match && stream_match) return true;
+                }
+                return false;
+            }), violations.end());
     }
 
     // ─── report ────────────────────────────────────────────────────────────

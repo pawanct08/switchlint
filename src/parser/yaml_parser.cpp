@@ -211,4 +211,25 @@ Topology parse_yaml(const std::string& path) {
     return topo;
 }
 
+std::vector<Suppression> parse_suppressions(const std::string& path) {
+    std::vector<Suppression> suppressions;
+    YAML::Node root;
+    try {
+        root = YAML::LoadFile(path);
+    } catch (...) {
+        return suppressions; // Silently ignore missing or invalid suppression files
+    }
+
+    if (root.IsSequence()) {
+        for (const auto& s : root) {
+            Suppression sup;
+            sup.rule_id   = s["rule"]   ? s["rule"].as<std::string>()   : "";
+            sup.stream_id = s["stream"] ? s["stream"].as<std::string>() : "";
+            sup.reason    = s["reason"] ? s["reason"].as<std::string>() : "No reason provided";
+            suppressions.push_back(sup);
+        }
+    }
+    return suppressions;
+}
+
 } // namespace switchlint

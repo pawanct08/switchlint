@@ -26,4 +26,10 @@ struct Violation {
     std::string message;
 };
 
+struct Suppression {
+    std::string rule_id;
+    std::string stream_id;
+    std::string reason;
+};
+
 } // namespace switchlint

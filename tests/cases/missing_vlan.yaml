@@ -1,0 +1,8 @@
+# tests/cases/missing_vlan.yaml
+topology: ../fixtures/broken_firewall.yaml
+expect:
+  - rule: FW001
+    stream: cam_front
+    node: SW1
+    port: p2
+    severity: ERROR
