@@ -92,6 +92,15 @@ static Port parse_port(const YAML::Node& n) {
         }
     }
 
+    // Storm Control
+    if (n["storm_control"]) {
+        const auto& s = n["storm_control"];
+        StormControl sc;
+        sc.broadcast_limit_kbps = s["broadcast_limit_kbps"] ? s["broadcast_limit_kbps"].as<uint32_t>() : 0;
+        sc.multicast_limit_kbps = s["multicast_limit_kbps"] ? s["multicast_limit_kbps"].as<uint32_t>() : 0;
+        p.storm_control = sc;
+    }
+
     return p;
 }
 

@@ -1,0 +1,23 @@
+nodes:
+  - id: ECU1
+    type: ecu
+    ports: [{id: p1}]
+  - id: SW1
+    type: switch
+    ports:
+      - id: p1
+      - id: p2 # No storm_control
+  - id: ECU2
+    type: ecu
+    ports: [{id: p1}]
+
+links:
+  - {src: ECU1, src_port: p1, dst: SW1, dst_port: p1}
+  - {src: SW1, src_port: p2, dst: ECU2, dst_port: p1}
+
+streams:
+  - id: safety_stream
+    src: ECU1
+    dst: [ECU2]
+    safety_level: 2 # ASIL-A
+    vlan_id: 100

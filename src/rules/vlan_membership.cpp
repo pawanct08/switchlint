@@ -15,6 +15,14 @@ public:
         return "Every port on a stream's path must carry the stream's VLAN";
     }
 
+    std::string explain() const override {
+        return "VLAN001 — VLAN Membership Gap\n"
+               "IEEE 802.1Q §8.8.3: A port must be a member of a VLAN to forward tagged frames for that VLAN.\n"
+               "If a switch port on the path is not in the stream's VLAN membership, frames are discarded.\n"
+               "This is the most common misconfiguration in automotive Ethernet switch bring-up.\n\n"
+               "Related: VLAN002 (tagging consistency), FW001 (firewall coverage)";
+    }
+
     std::vector<Violation> check(const Topology& topo) const override {
         std::vector<Violation> violations;
 

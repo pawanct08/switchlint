@@ -18,9 +18,10 @@ public:
 
     /// Short unique identifier, e.g. "VLAN001"
     virtual std::string id() const = 0;
-
-    /// Human-readable description shown in --list-rules output
     virtual std::string description() const = 0;
+
+    /// Detailed explanation of the rule, including standard references.
+    virtual std::string explain() const { return "No detailed explanation available."; }
 
     /// Run this rule against the topology and return any violations.
     virtual std::vector<Violation> check(const Topology& topo) const = 0;
@@ -40,6 +41,9 @@ public:
 
     /// Returns all registered rule ids + descriptions.
     std::vector<std::pair<std::string, std::string>> list_rules() const;
+
+    /// Returns detailed explanation for a given rule.
+    std::string explain(const std::string& rule_id) const;
 
 private:
     std::vector<std::unique_ptr<Rule>> rules_;

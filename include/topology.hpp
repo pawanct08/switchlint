@@ -54,6 +54,11 @@ struct MACsecConfig {
 
 // ─── Port ─────────────────────────────────────────────────────────────────────
 
+struct StormControl {
+    uint32_t broadcast_limit_kbps{0};   // 0 = unlimited
+    uint32_t multicast_limit_kbps{0};
+};
+
 struct Port {
     std::string                id;
     std::vector<uint16_t>      vlans;    // VLAN membership list
@@ -63,6 +68,7 @@ struct Port {
     PortQoS                    qos;
     MACsecConfig               macsec;
     std::vector<FirewallEntry> firewall;
+    std::optional<StormControl> storm_control;
 };
 
 // ─── Node (ECU or Switch) ─────────────────────────────────────────────────────

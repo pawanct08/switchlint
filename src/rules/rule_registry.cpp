@@ -33,4 +33,11 @@ std::vector<std::pair<std::string,std::string>> RuleRegistry::list_rules() const
     return out;
 }
 
+std::string RuleRegistry::explain(const std::string& rule_id) const {
+    for (const auto& r : rules_) {
+        if (r->id() == rule_id) return r->explain();
+    }
+    return "Unknown rule ID: " + rule_id;
+}
+
 } // namespace switchlint

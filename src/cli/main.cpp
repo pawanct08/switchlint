@@ -17,6 +17,7 @@
 #include "../report/text_reporter.hpp"
 #include "../report/json_reporter.hpp"
 #include "../report/diff_reporter.hpp"
+#include "../report/sarif_reporter.hpp"
 
 #include <algorithm>
 #include <cstdlib>
@@ -48,6 +49,7 @@ static void print_usage(const char* prog) {
         "  --output <file>         Write output to file\n"
         "  --rules RULE1,RULE2     Run only specific rules\n"
         "  --list-rules            List all rules and exit\n"
+        "  --explain <rule>        Explain a rule and its rationale\n"
         "  --no-color              Disable ANSI colors\n"
         "  --fail-on-warn          Exit 1 on warnings too\n"
         "  --strict-unicast-fw     Enforce firewall rules on unicast streams\n"
@@ -68,6 +70,7 @@ int main(int argc, char* argv[]) {
     bool list_rules_opt = false;
     bool strict_unicast_fw = false;
     bool diff_mode      = false;
+    std::string explain_rule;
 
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
@@ -76,6 +79,8 @@ int main(int argc, char* argv[]) {
             return 0;
         } else if (arg == "--list-rules") {
             list_rules_opt = true;
+        } else if (arg == "--explain" && i + 1 < argc) {
+            explain_rule = argv[++i];
         } else if (arg == "--no-color") {
             use_color = false;
         } else if (arg == "--fail-on-warn") {
@@ -106,6 +111,11 @@ int main(int argc, char* argv[]) {
     if (list_rules_opt) {
         for (const auto& [id, desc] : registry.list_rules())
             std::cout << id << "  " << desc << '\n';
+        return 0;
+    }
+
+    if (!explain_rule.empty()) {
+        std::cout << registry.explain(explain_rule) << std::endl;
         return 0;
     }
 
@@ -182,6 +192,17 @@ int main(int argc, char* argv[]) {
             switchlint::print_json_report(violations, std::cout);
         else
             switchlint::write_json_report(violations, output_file);
+    } else if (format == "sarif") {
+        if (output_file.empty()) {
+            switchlint::print_sarif_report(violations, std::cout);
+        } else {
+            std::ofstream ofs(output_file);
+            if (!ofs) {
+                std::cerr << "[FATAL] Failed to open output file: " << output_file << '\n';
+                return 2;
+            }
+            switchlint::print_sarif_report(violations, ofs);
+        }
     } else {
         if (output_file.empty()) {
             switchlint::print_text_report(violations, use_color, std::cout);

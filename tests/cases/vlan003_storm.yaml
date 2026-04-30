@@ -1,0 +1,8 @@
+# tests/cases/vlan003_storm.yaml
+topology: ../fixtures/vlan_storm_missing.yaml
+expect:
+  - rule: VLAN003
+    stream: safety_stream
+    node: SW1
+    port: p2
+    severity: WARNING

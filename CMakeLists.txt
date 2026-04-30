@@ -55,9 +55,11 @@ add_library(switchlint_core STATIC
     src/rules/orphan_detection.cpp
     src/rules/macsec_validation.cpp
     src/rules/latency_budget.cpp
+    src/rules/vlan_storm_control.cpp
     src/report/text_reporter.cpp
     src/report/json_reporter.cpp
     src/report/diff_reporter.cpp
+    src/report/sarif_reporter.cpp
 )
 
 target_include_directories(switchlint_core PUBLIC
